@@ -48,8 +48,16 @@ GROUP BY set_map
    END //
  DELIMITER ;
  
- select bin(set_map), set_map, full_count from struct_data;
+select bin(set_map), set_map, full_count from struct_data;
 
 select * from struct_data;
 
-select bin(criteria), BIT_COUNT(criteia) from raw_data;
+-- create weighted data table for run-time testing
+drop table if exists raw_data_weighted;
+create table raw_data_weighted as
+    select r1.criteia, r1.count, sum(r2.count) as weight
+    from raw_data r1
+    join raw_data r2
+    where r1.criteia >= r2.criteia
+    group by r1.criteia, r1.count
+;
