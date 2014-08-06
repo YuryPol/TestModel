@@ -31,13 +31,17 @@ public class Simulation {
             rs.next();
             int max_weight = rs.getInt(1);
             int rand_weight;
-            int count_max = 0;
-            getWeightStatement = con.prepareStatement("select max(weight) from raw_data_weighted where weight < ?");
+            getWeightStatement = con.prepareStatement("select max(weight) from raw_data_weighted where weight <= ?");
             updateStatement = con.prepareStatement("update raw_data_weighted set count = count - 1 where weight = ? and count > 0");
             controlStatement = con.prepareStatement("select max(count) from raw_data_weighted");
             
             do {
-            	getWeightStatement.setInt(1, rand.nextInt(max_weight));
+            	rs=controlStatement.executeQuery();
+            	rs.next();
+            	if (rs.getInt(1) <= 0)
+            		break;
+
+            	getWeightStatement.setInt(1, rand.nextInt(max_weight+1));
 	            rs=getWeightStatement.executeQuery();
 	            rs.next();
 	            rand_weight = rs.getInt(1);
@@ -46,17 +50,11 @@ public class Simulation {
 	            updateStatement.setInt(1, rand_weight);
 	            if (updateStatement.executeUpdate() == 0)
 	            	continue;
-	            else {
-	            	rs=controlStatement.executeQuery();
-	            	rs.next();
-	            	count_max = rs.getInt(1);
-	            }	            
-            } while (count_max > 0);
+            } while (true);
 
         } catch (SQLException ex) {
             Logger lgr = Logger.getLogger(Simulation.class.getName());
             lgr.log(Level.SEVERE, ex.getMessage(), ex);
-
         } finally {
             try {
                 if (countStatement != null) {

@@ -57,7 +57,10 @@ create table raw_data_weighted(criteia BIGINT NOT NULL,
     count INT, 
     weight INT,
     primary key (weight));
-    
+
+-- clear weighted datga table
+delete from raw_data_weighted;
+ 
 -- populate weighted data table
 insert into raw_data_weighted
     select r1.criteia, r1.count, sum(r2.count) as weight
