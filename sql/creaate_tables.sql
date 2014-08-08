@@ -6,12 +6,18 @@ CREATE TABLE RAW_DATA (criteia BIGINT NOT NULL,
     PRIMARY KEY (criteia));
 
 DROP TABLE IF EXISTS STRUCT_DATA;
+delete from struct_data;
+
 -- creating structured data 
-CREATE TABLE STRUCT_DATA (set_map BIGINT, 
-    full_count INT);
+CREATE TABLE STRUCT_DATA (
+    set_map BIGINT, 
+    full_count INT, 
+    availability INT, 
+    goal INT);
+    
 -- and filling them with RAW_DATA
 INSERT INTO STRUCT_DATA
-SELECT set_map, SUM(full_count) FROM (
+SELECT set_map, SUM(full_count), SUM(full_count), 0 FROM (
 SELECT r1.criteia AS set_map, r2.count AS full_count
 FROM RAW_DATA r1
 LEFT OUTER JOIN RAW_DATA r2
@@ -28,27 +34,24 @@ GROUP BY set_map
    BEGIN
     DECLARE cnt INT;
    
-    SELECT full_count INTO cnt FROM struct_data WHERE set_map = iset;
+    SELECT availability INTO cnt FROM struct_data WHERE set_map = iset;
  
     IF cnt >= amount AND amount > 0 AND BIT_COUNT(iset)=1
     THEN
 	 SELECT 'ok';
-     UPDATE struct_data set full_count=full_count-amount WHERE (set_map & iset)>0;
+     UPDATE struct_data set availability=availability-amount WHERE (set_map & iset)>0;
+     UPDATE struct_data set goal=goal+amount WHERE set_map = iset;
      DROP TABLE IF EXISTS struct_data_tmp;
      CREATE TABLE struct_data_tmp SELECT * FROM struct_data;
-     UPDATE struct_data sd SET full_count = (SELECT min(sdt.full_count) FROM struct_data_tmp sdt
+     UPDATE struct_data sd SET availability = (SELECT min(sdt.availability) FROM struct_data_tmp sdt
        WHERE (sd.set_map & sdt.set_map) = sd.set_map AND sd.set_map <= sdt.set_map);
-     -- DROP TABLE IF EXISTS struct_data_final;
-     -- CREATE TABLE struct_data_final AS 
-     --    SELECT sd.set_map, IF(sd.full_count > sdt.full_count, sdt.full_count, sd.full_count) as full_count
-     --    FROM struct_data sd JOIN struct_data_tmp sdt ON sdt.set_map = sd.set_map;     
 	ELSE
      SELECT 'not ok';
     END IF;
    END //
  DELIMITER ;
  
-select bin(set_map), set_map, full_count from struct_data;
+select bin(set_map), set_map, full_count, availability, goal from struct_data;
 
 select * from struct_data;
 
