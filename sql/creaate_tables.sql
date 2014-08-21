@@ -1,26 +1,26 @@
 use test_fia;
 
 -- create raw_data table to fill up by 
-CREATE TABLE RAW_DATA (criteia BIGINT NOT NULL, 
+CREATE TABLE raw_data (criteia BIGINT NOT NULL, 
     count INT,
     PRIMARY KEY (criteia));
 
-DROP TABLE IF EXISTS STRUCT_DATA;
+DROP TABLE IF EXISTS struct_data;
 delete from struct_data;
 
 -- creating structured data 
-CREATE TABLE STRUCT_DATA (
+CREATE TABLE struct_data (
     set_map BIGINT, 
     full_count INT, 
     availability INT, 
     goal INT);
     
--- and filling them with RAW_DATA
-INSERT INTO STRUCT_DATA
+-- and filling them with raw_data
+INSERT INTO struct_data
 SELECT set_map, SUM(full_count), SUM(full_count), 0 FROM (
 SELECT r1.criteia AS set_map, r2.count AS full_count
-FROM RAW_DATA r1
-LEFT OUTER JOIN RAW_DATA r2
+FROM raw_data r1
+LEFT OUTER JOIN raw_data r2
 ON r1.criteia & r2.criteia) tmp
 WHERE full_count IS NOT NULL
 GROUP BY set_map
@@ -61,9 +61,8 @@ create table raw_data_weighted(criteia BIGINT NOT NULL,
     weight INT,
     primary key (weight));
 
--- clear weighted datga table
-delete from raw_data_weighted;
- 
+-- clear weighted data table
+delete from raw_data_weighted; 
 -- populate weighted data table
 insert into raw_data_weighted
     select r1.criteia, r1.count, sum(r2.count) as weight
@@ -73,3 +72,17 @@ insert into raw_data_weighted
     and r1.count > 0
     group by r1.criteia, r1.count
 ;
+-- clear result data table
+delete from result_data;
+
+select bin(criteia), criteia, count, weight from raw_data_weighted;
+select bin(criteia), criteia, count from raw_data;
+
+-- create result data table for run-time testing
+create table result_data (set_map BIGINT NOT NULL, 
+    count INT, 
+    primary key (set_map));
+
+select bin(set_map), set_map, count from result_data;
+
+
