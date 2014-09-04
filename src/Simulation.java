@@ -14,6 +14,7 @@ public class Simulation {
         Connection con = null;
         ResultSet rs = null;
         ResultSet rs1 = null;
+        PreparedStatement clearResultStatement=null;
         PreparedStatement countStatement = null;
         PreparedStatement updateRawData = null;
         PreparedStatement controlStatement = null;
@@ -30,6 +31,9 @@ public class Simulation {
         try {
             con = DriverManager.getConnection(url, user, password);
             
+            // clear the results
+            clearResultStatement = con.prepareStatement("delete from result_data");
+            clearResultStatement.execute();
             // read raw_data_weighted table
             countStatement = con.prepareStatement("select max(weight) from raw_data_weighted");
             rs = countStatement.executeQuery();

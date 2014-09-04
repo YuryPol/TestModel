@@ -1,12 +1,17 @@
+----------------------
+-- the process:
+---------------------
 use test_fia;
+-- run GenInput.java
+
 
 -- create raw_data table to fill up by 
 CREATE TABLE raw_data (criteia BIGINT NOT NULL, 
     count INT,
-    PRIMARY KEY (criteia));
+    PRIMARY KEY (criteia));    
+-- populated by GenInput.java
 
 DROP TABLE IF EXISTS struct_data;
-delete from struct_data;
 
 -- creating structured data 
 CREATE TABLE struct_data (
@@ -16,6 +21,8 @@ CREATE TABLE struct_data (
     goal INT);
     
 -- and filling them with raw_data
+delete from struct_data;
+
 INSERT INTO struct_data
 SELECT set_map, SUM(full_count), SUM(full_count), 0 FROM (
 SELECT r1.criteia AS set_map, r2.count AS full_count
@@ -25,7 +32,6 @@ ON r1.criteia & r2.criteia) tmp
 WHERE full_count IS NOT NULL
 GROUP BY set_map
 ;
-
 
 -- getting amount of items from structured data
  DROP PROCEDURE IF EXISTS GetItems;
