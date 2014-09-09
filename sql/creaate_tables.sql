@@ -2,7 +2,20 @@
 -- the process:
 ---------------------
 use test_fia;
--- run GenInput.java
+-- if we want to change raw data
+-- om cmd prompt:
+-- java -cp "C:/Program Files (x86)/MySQL/MySQL Connector J/mysql-connector-java-5.1.31-bin.jar";C:/Users/ypolyako/workspace/TestModel/bin GenInput
+-- on MySql prompt:
+-- call GetStructData;
+--
+-- run always:
+-- call GetWeightRawData;
+-- start alotments 
+-- select bin(set_map), set_map, full_count, availability, goal from struct_data;
+-- deside on criteria, ammount
+-- call GetItems(criteria, ammount);
+--  -"- repeat until done
+-- java -cp "C:/Program Files (x86)/MySQL/MySQL Connector J/mysql-connector-java-5.1.31-bin.jar";C:/Users/ypolyako/workspace/TestModel/bin Simulation
 
 
 -- create raw_data table to fill up by 
@@ -21,17 +34,22 @@ CREATE TABLE struct_data (
     goal INT);
     
 -- and filling them with raw_data
-delete from struct_data;
-
-INSERT INTO struct_data
-SELECT set_map, SUM(full_count), SUM(full_count), 0 FROM (
-SELECT r1.criteia AS set_map, r2.count AS full_count
-FROM raw_data r1
-LEFT OUTER JOIN raw_data r2
-ON r1.criteia & r2.criteia) tmp
-WHERE full_count IS NOT NULL
-GROUP BY set_map
-;
+DROP PROCEDURE IF EXISTS GetStructData;
+ DELIMITER //
+ CREATE PROCEDURE GetStructData()
+   BEGIN
+    delete from struct_data;    
+    INSERT INTO struct_data
+    SELECT set_map, SUM(full_count), SUM(full_count), 0 FROM (
+    SELECT r1.criteia AS set_map, r2.count AS full_count
+    FROM raw_data r1
+    LEFT OUTER JOIN raw_data r2
+    ON r1.criteia & r2.criteia) tmp
+    WHERE full_count IS NOT NULL
+    GROUP BY set_map
+    ;
+   END //
+ DELIMITER ;
 
 -- getting amount of items from structured data
  DROP PROCEDURE IF EXISTS GetItems;
@@ -57,7 +75,8 @@ GROUP BY set_map
    END //
  DELIMITER ;
  
-select bin(set_map), set_map, full_count, availability, goal from struct_data;
+select bin(set_map), set_map, full_count, availability, goal 
+from struct_data;
 
 select * from struct_data;
 
@@ -67,17 +86,24 @@ create table raw_data_weighted(criteia BIGINT NOT NULL,
     weight INT,
     primary key (weight));
 
--- clear weighted data table
-delete from raw_data_weighted; 
--- populate weighted data table
-insert into raw_data_weighted
-    select r1.criteia, r1.count, sum(r2.count) as weight
-    from raw_data r1
-    join raw_data r2
-    where r1.criteia >= r2.criteia
-    and r1.count > 0
-    group by r1.criteia, r1.count
-;
+ DROP PROCEDURE IF EXISTS GetWeightRawData;
+ DELIMITER //
+ CREATE PROCEDURE GetWeightRawData()
+   BEGIN
+    -- clear weighted data table
+    delete from raw_data_weighted; 
+    -- populate weighted data table
+    insert into raw_data_weighted
+        select r1.criteia, r1.count, sum(r2.count) as weight
+        from raw_data r1
+        join raw_data r2
+        where r1.criteia >= r2.criteia
+        and r1.count > 0
+        group by r1.criteia, r1.count
+    ;
+   END //
+ DELIMITER ;
+    
 -- clear result data table
 delete from result_data;
 
