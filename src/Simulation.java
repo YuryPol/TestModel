@@ -15,6 +15,7 @@ public class Simulation {
         ResultSet rs = null;
         ResultSet rs1 = null;
         PreparedStatement clearResultStatement=null;
+        PreparedStatement clearMissesStatement=null;
         PreparedStatement countStatement = null;
         PreparedStatement updateRawData = null;
         PreparedStatement controlStatement = null;
@@ -22,6 +23,7 @@ public class Simulation {
         PreparedStatement getCriteiaStatement = null;
         PreparedStatement getGoalStatement = null;
         PreparedStatement updateResultData = null;
+        PreparedStatement updateMissedCalls = null;
         PreparedStatement getServedCountStatement = null;
         String url = "jdbc:mysql://localhost:3306/test_fia";
         String user = "root";
@@ -34,6 +36,7 @@ public class Simulation {
             // clear the results
             clearResultStatement = con.prepareStatement("delete from result_data");
             clearResultStatement.execute();
+            clearMissesStatement =con.prepareStatement("delete from misses");
             // read raw_data_weighted table
             countStatement = con.prepareStatement("select max(weight) from raw_data_weighted");
             rs = countStatement.executeQuery();
@@ -55,6 +58,7 @@ public class Simulation {
             getGoalStatement = con.prepareStatement("select set_map, full_count, availability, goal from struct_data where BIT_COUNT(set_map)=1 and set_map & ?");
             getServedCountStatement = con.prepareStatement("select count from result_data where set_map = ?");
             updateResultData = con.prepareStatement("insert into result_data (set_map, count) values(?, 1) on duplicate key update count = count + 1");
+            updateMissedCalls = con.prepareStatement("insert into misses (criteia, count) values(?, 1) on duplicate key update count = count + 1");
             
             do {
             	selected_set_map = 0;
@@ -86,8 +90,12 @@ public class Simulation {
 	            // handle the request	        
 	            getGoalStatement.setLong(1, criteia);
 	            rs = getGoalStatement.executeQuery();
-	            if (!rs.next())
-	            	continue;  // not a target or no match found
+	            if (!rs.next()) {
+	            	// not a target or no match found
+	            	updateMissedCalls.setLong(1, criteia);
+	            	updateMissedCalls.executeUpdate();
+	            	continue;  
+	            }
 	            
 	            do {
 	            	// find best candidate
@@ -140,6 +148,9 @@ public class Simulation {
                 }
                 if (updateResultData != null) {
                 	updateResultData.close();
+                }
+                if (updateMissedCalls != null) {
+                	updateMissedCalls.close();
                 }
                 if (con != null) {
                     con.close();

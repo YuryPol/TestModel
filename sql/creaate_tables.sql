@@ -6,10 +6,10 @@ use test_fia;
 -- om cmd prompt:
 -- java -cp "C:/Program Files (x86)/MySQL/MySQL Connector J/mysql-connector-java-5.1.31-bin.jar";C:/Users/ypolyako/workspace/TestModel/bin GenInput
 -- on MySql prompt:
--- call GetStructData;
 --
 -- run always:
 -- call GetWeightRawData;
+-- call GetStructData;
 -- start alotments 
 -- select bin(set_map), set_map, full_count, availability, goal from struct_data;
 -- deside on criteria, ammount
@@ -117,4 +117,8 @@ create table result_data (set_map BIGINT NOT NULL,
 
 select bin(set_map), set_map, count from result_data;
 
+create table misses (criteia BIGINT NOT NULL, 
+    count INT,
+    primary key (criteia));
+    
 
