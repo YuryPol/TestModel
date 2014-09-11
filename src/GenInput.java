@@ -27,7 +27,7 @@ import java.util.logging.Logger;
 	        
 	        Random rand= new Random();
 	        int count_bitmask=0x000F;
-	        long criteria_bitmask=0x0000000F;
+	        long criteria_bitmask=0x0000007F;
 	        
 
 	        try {

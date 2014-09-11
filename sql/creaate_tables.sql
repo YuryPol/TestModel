@@ -5,17 +5,19 @@ use test_fia;
 -- if we want to change raw data
 -- om cmd prompt:
 -- java -cp "C:/Program Files (x86)/MySQL/MySQL Connector J/mysql-connector-java-5.1.31-bin.jar";C:/Users/ypolyako/workspace/TestModel/bin GenInput
--- on MySql prompt:
---
+---------------------
 -- run always:
+-- on MySql prompt 
 -- call GetWeightRawData;
 -- call GetStructData;
 -- start alotments 
--- select bin(set_map), set_map, full_count, availability, goal from struct_data;
+-- select bin(set_map), set_map, full_count, availability, goal from struct_data where BIT_COUNT(set_map)=1;
 -- deside on criteria, ammount
 -- call GetItems(criteria, ammount);
 --  -"- repeat until done
 -- java -cp "C:/Program Files (x86)/MySQL/MySQL Connector J/mysql-connector-java-5.1.31-bin.jar";C:/Users/ypolyako/workspace/TestModel/bin Simulation
+-- check results
+-- 
 
 
 -- create raw_data table to fill up by 
