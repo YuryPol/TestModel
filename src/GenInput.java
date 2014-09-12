@@ -2,7 +2,6 @@
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Random;
@@ -12,23 +11,19 @@ import java.util.logging.Logger;
 // import com.mysql.jdbc.PreparedStatement;
 
 	public class GenInput {
-		public static final int bitmask = 0x000F;
+		public static final long criteria_bitmask=0x0000007F;
+		public static final int max_volume = 100;
 
 	    public static void main(String[] args) {
 
 	        Connection con = null;
 	        Statement st = null;
-	        ResultSet rs = null;
 	        PreparedStatement insertStatement = null;
-	        PreparedStatement controlStatement = null;
 	        String url = "jdbc:mysql://localhost:3306/test_fia";
 	        String user = "root";
 	        String password = "IraAnna12";
 	        
-	        Random rand= new Random();
-	        int count_bitmask=0x000F;
-	        long criteria_bitmask=0x0000007F;
-	        
+	        Random rand= new Random();        
 
 	        try {
 	            con = DriverManager.getConnection(url, user, password);
@@ -38,15 +33,12 @@ import java.util.logging.Logger;
 	            st.executeUpdate("DELETE FROM RAW_DATA"); 
 	            
 	            // populate table
-	            controlStatement = con.prepareStatement("SELECT COUNT(*) FROM RAW_DATA");
-	            insertStatement = con.prepareStatement("INSERT INTO RAW_DATA SET criteia = ?, count = ? ON DUPLICATE KEY UPDATE count = ?");
-	            do {
-	            	insertStatement.setLong(1, rand.nextLong()&criteria_bitmask);
-		            insertStatement.setInt(2, rand.nextInt()&count_bitmask);
-		            insertStatement.setInt(3, rand.nextInt()&count_bitmask);
+	            insertStatement = con.prepareStatement("INSERT IGNORE INTO RAW_DATA SET criteia = ?, count = ?");
+	            for (int criteia = 0; criteia <= criteria_bitmask; criteia++) {
+	            	insertStatement.setLong(1, criteia);
+		            insertStatement.setInt(2, rand.nextInt(max_volume));
 		            insertStatement.execute();
-		            rs=controlStatement.executeQuery();
-	            } while (rs.next() && rs.getInt(1) <= criteria_bitmask);
+	            }
 
 	        } catch (SQLException ex) {
 	            Logger lgr = Logger.getLogger(GenInput.class.getName());
@@ -56,9 +48,6 @@ import java.util.logging.Logger;
 	            try {
 	                if (st != null) {
 	                    st.close();
-	                }
-	                if (controlStatement != null) {
-	                	controlStatement.close();
 	                }
 	                if (insertStatement != null) {
 	                	insertStatement.close();
