@@ -6,6 +6,7 @@
 *.tree
 *.resources
 scripts/.metadata/
+.metadata/
 
 # ignore eclipse debris
 .settings/
