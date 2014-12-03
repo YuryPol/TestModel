@@ -1,0 +1,31 @@
+*.xml
+*.lock
+*.dat
+*.version
+*.index
+*.tree
+*.resources
+scripts/.metadata/
+
+# ignore eclipse debris
+.settings/
+.project
+.Rapp*
+.metadata/
+
+*.class
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+# eclipse debris #
+.classpath
+.project
+.settings/
+.metadata/
+
+# misc build artifacts #
+target/
+
