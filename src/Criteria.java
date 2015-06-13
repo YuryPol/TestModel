@@ -23,6 +23,9 @@ import java.util.Set;
 @SuppressWarnings("serial")
 public class Criteria extends HashMap<String, HashSet<String>>
 {
+	Criteria() {
+		
+	}
 	Criteria(String names[], Collection<? extends String> values[]) {
 	    // Put elements to the map
 		for (int i = 0; i < names.length; i++) {

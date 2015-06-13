@@ -27,9 +27,9 @@
 	         
 	        if (getInputType(jsonParser) == "inventorysets")
 	        {
-	        	InventorySet invset = new InventorySet();
-	        	parseInventorySet(jsonParser, invset);
-		        System.out.println("Employee Object\n\n"+invset);
+	        	String invset;
+	        	parseInventorySet(jsonParser);
+		        System.out.println("Employee Object\n\n");
 	        }
 	         
 	        jsonParser.close();
@@ -57,7 +57,7 @@
 			gender	:	M
 		*/
 	 
-	    private static void parseInventorySet(JsonParser jsonParser, InventorySet invset) throws JsonParseException, IOException 
+	    private static void parseInventorySet(JsonParser jsonParser) throws JsonParseException, IOException 
 	    {	         
 	        JsonToken current;
 	        current = jsonParser.nextToken();
@@ -73,21 +73,19 @@
 	            }
                 // For each of the records in the array
 		        if (jsonParser.nextToken() != JsonToken.START_OBJECT){
-                	invset = null;
-		        	return;
+ 		        	return;
 		        }
 		        while(jsonParser.nextToken() != JsonToken.END_OBJECT){
 	            
                 if (jsonParser.nextToken() != JsonToken.END_ARRAY) {
-                	// ended
-                	invset = null;
                 	return;
 	            }
+	        }
 	        }
 	    }
 	            
 	            
-	    private static void parseJSON(JsonParser jsonParser, Employee emp,
+	    private static void parseJSON(JsonParser jsonParser,
 	            List<Long> phoneNums, boolean insidePropertiesObj) throws JsonParseException, IOException {
 	         
 	        //loop through the JsonTokens
@@ -95,46 +93,15 @@
 	            String name = jsonParser.getCurrentName();
 	            if("id".equals(name)){
 	                jsonParser.nextToken();
-	                emp.setId(jsonParser.getIntValue());
 	            }else if("name".equals(name)){
 	                jsonParser.nextToken();
-	                emp.setName(jsonParser.getText());
-	            }else if("permanent".equals(name)){
-	                jsonParser.nextToken();
-	                emp.setPermanent(jsonParser.getBooleanValue());
-	            }else if("address".equals(name)){
-	                jsonParser.nextToken();
-	                //nested object, recursive call
-	                parseJSON(jsonParser, emp, phoneNums, insidePropertiesObj);
-	            }else if("street".equals(name)){
-	                jsonParser.nextToken();
-	                emp.getAddress().setStreet(jsonParser.getText());
-	            }else if("city".equals(name)){
-	                jsonParser.nextToken();
-	                emp.getAddress().setCity(jsonParser.getText());
-	            }else if("zipcode".equals(name)){
-	                jsonParser.nextToken();
-	                emp.getAddress().setZipcode(jsonParser.getIntValue());
-	            }else if("phoneNumbers".equals(name)){
-	                jsonParser.nextToken();
-	                while (jsonParser.nextToken() != JsonToken.END_ARRAY) {
-	                    phoneNums.add(jsonParser.getLongValue());
-	                }
-	            }else if("role".equals(name)){
-	                jsonParser.nextToken();
-	                emp.setRole(jsonParser.getText());
-	            }else if("cities".equals(name)){
-	                jsonParser.nextToken();
-	                while (jsonParser.nextToken() != JsonToken.END_ARRAY) {
-	                    emp.getCities().add(jsonParser.getText());
-	                }
+	                jsonParser.getText();
 	            }else if("properties".equals(name)){
 	                jsonParser.nextToken();
 	                while(jsonParser.nextToken() != JsonToken.END_OBJECT){
 	                    String key = jsonParser.getCurrentName();
 	                    jsonParser.nextToken();
 	                    String value = jsonParser.getText();
-	                    emp.getProperties().put(key, value);
 	                }
 	            }
 	        }
