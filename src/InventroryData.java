@@ -77,7 +77,7 @@ public class InventroryData implements Serializable {
 	  private int version;
 	  private String owner;
 	  private String name;
-	  private String update;
+	  private Boolean update;
 	  
 	  private inventoryset[] inventorysets;
 	  private segment[] segments;
@@ -131,14 +131,14 @@ public class InventroryData implements Serializable {
 	/**
 	 * @return the update
 	 */
-	public String getUpdate() {
+	public Boolean getUpdate() {
 		return update;
 	}
 
 	/**
 	 * @param update the update to set
 	 */
-	public void setUpdate(String update) {
+	public void setUpdate(Boolean update) {
 		this.update = update;
 	}
 

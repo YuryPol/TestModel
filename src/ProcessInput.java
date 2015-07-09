@@ -12,7 +12,7 @@ public class ProcessInput {
 		byte[] jsonData = null;
 		String test;
 		try {
-			jsonData = Files.readAllBytes(Paths.get("C:/Users/ypolyako/Downloads/inventorysets.json"));
+			jsonData = Files.readAllBytes(Paths.get("C:/Users/ypolyako/Downloads/inventory.json"));
 			test = new String(jsonData);
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
@@ -29,6 +29,7 @@ public class ProcessInput {
 			InventroryData data= objectMapper.readValue(jsonData, InventroryData.class);
 			
 			String dataStr = data.toString();
+			System.out.println(dataStr);
 			
 /*			BaseSetsChoices choices = objectMapper.readValue(jsonData, BaseSetsChoices.class);
 */		} catch (Exception e) {
