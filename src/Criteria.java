@@ -1,39 +1,32 @@
-import java.util.Collection;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
+/**
+ * 
+ */
 
-// class contains criterion name and values. E.g. 
-//  {
-//    "income": [
-//      "affluent"
-//    ],
-//    "gender": [
-//      "M"
-//    ],
-//    "content": [
-//      "business",
-//      "sport",
-//      "news"
-//    ]
-//  }
-
-@SuppressWarnings("serial")
-public class Criteria extends HashMap<String, HashSet<String>>
+/**
+ * @author "Yury"
+ *
+ */
+public class criteria extends HashMap<String, HashSet<String>> implements Serializable 
 {
-	Criteria() {
-		
-	}
-	Criteria(String names[], Collection<? extends String> values[]) {
-	    // Put elements to the map
-		for (int i = 0; i < names.length; i++) {
-			put(names[i], new HashSet<String>(values[i]));
-		}
-	 }
 
-	public boolean containsAll(Criteria another) {
+	/**
+	 * 
+	 */
+	public criteria() {
+		// TODO Auto-generated constructor stub
+	}
+
+	criteria(inventoryset is)
+	{
+		putAll(is.getcriteria());
+	}
+
+	public boolean containsAll(criteria another) {
 		// get this names
 		Set<String> thisNames = keySet();
 		Set<String> anotherNames = another.keySet();
@@ -41,7 +34,7 @@ public class Criteria extends HashMap<String, HashSet<String>>
 		{
 			// another Criteria contains all names of this one, so it is more (or the same) specific
 		    // check elements
-		    for (Object name: thisNames) {
+		    for (String name: thisNames) {
 		    	HashSet<String> anotherValues = another.get(name);
 		    	if (!anotherValues.containsAll(get(name)))
 		    		// criteron's values are OR-ed with each other
@@ -54,5 +47,4 @@ public class Criteria extends HashMap<String, HashSet<String>>
 			// fewer selection criteria means wider set
 			return false;
 	}
-
 }

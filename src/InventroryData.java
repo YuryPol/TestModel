@@ -5,7 +5,7 @@ import java.io.Serializable;
  */
 
 /**
- * @author ypolyako
+ * @author Yury
  *
  */
 public class InventroryData implements Serializable {

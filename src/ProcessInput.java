@@ -3,11 +3,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
  
 
 public class ProcessInput {
 
- 	public static void main(String[] args) 
+	public static void main(String[] args) 
 	{
 		byte[] jsonData = null;
 		String test;
@@ -25,14 +28,25 @@ public class ProcessInput {
 			//create ObjectMapper instance
 			ObjectMapper objectMapper = new ObjectMapper();
 
-			//convert json string to object
-			InventroryData data= objectMapper.readValue(jsonData, InventroryData.class);
+			//convert json input to object
+			InventroryData inventorydata= objectMapper.readValue(jsonData, InventroryData.class);
+
+			System.out.println(inventorydata.toString());
+
+			Set<criteria> criteria_set = new HashSet<criteria>();
+
+			// Create filter for criteria used in inventory sets
+			for (inventoryset is : inventorydata.getInventorysets())
+			{
+				criteria_set.add(is.getcriteria());
+			}
 			
-			String dataStr = data.toString();
-			System.out.println(dataStr);
+			System.out.println(criteria_set.toString());
 			
-/*			BaseSetsChoices choices = objectMapper.readValue(jsonData, BaseSetsChoices.class);
-*/		} catch (Exception e) {
+			// Filter out segments and create raw inventory
+			
+
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}

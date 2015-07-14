@@ -1,4 +1,6 @@
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 /**
@@ -6,7 +8,7 @@ import java.util.Map;
  */
 
 /**
- * @author ypolyako
+ * @author Yury
  *
  */
 public class inventoryset implements Serializable {
@@ -43,7 +45,7 @@ public class inventoryset implements Serializable {
 	 */
 	
 	private String name;
-	private Map<String, String[]> criteria;
+	private criteria this_criteria;
     private int goal;
 
 	public inventoryset() {
@@ -67,15 +69,15 @@ public class inventoryset implements Serializable {
 	/**
 	 * @return the criteria
 	 */
-	public Map<String, String[]> getcriteria() {
-		return criteria;
+	public criteria getcriteria() {
+		return this_criteria;
 	}
 
 	/**
-	 * @param criteria the criteria to set
+	 * @param that_criteria the criteria to set
 	 */
-	public void setcriteria(Map<String, String[]> criteria) {
-		this.criteria = criteria;
+	public void setcriteria(criteria that_criteria) {
+		this.this_criteria = that_criteria;
 	}
 
 	/**

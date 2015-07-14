@@ -1,6 +1,7 @@
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 /**
@@ -8,7 +9,7 @@ import java.util.Map;
  */
 
 /**
- * @author ypolyako
+ * @author Yury
  *
  */
 public class segment implements Serializable {
@@ -29,7 +30,7 @@ public class segment implements Serializable {
 		    "count": 80000
 	 */
 	
-	private HashMap<String, ArrayList<String>> criteria;
+	private criteria this_criteria;
 	private int count;
 	
 	public segment() {
@@ -53,15 +54,15 @@ public class segment implements Serializable {
 	/**
 	 * @return the criteria
 	 */
-	public Map<String, ArrayList<String>> getcriteria() {
-		return criteria;
+	public criteria getcriteria() {
+		return this_criteria;
 	}
 
 	/**
-	 * @param criteria the criteria to set
+	 * @param that_criteria the criteria to set
 	 */
-	public void setcriteria(HashMap<String, ArrayList<String>> criteria) {
-		this.criteria = criteria;
+	public void setcriteria(criteria that_criteria) {
+		this.this_criteria = that_criteria;
 	}
 
 }

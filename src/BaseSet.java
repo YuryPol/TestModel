@@ -30,7 +30,7 @@
     
 public class BaseSet {
 	private String name;
-	private Criteria criteria;
+	private criteria this_criteria;
 	private int availablity = 0;
 	private int goal;
 	private long unionOf = 0;
@@ -42,23 +42,23 @@ public class BaseSet {
 		name = nm;
 	};
 	
-	public Criteria getCriteria() {
-		return criteria;
+	public criteria getCriteria() {
+		return this_criteria;
 	};
-	public void setCriteria(Criteria crt) {
-		criteria = crt;
+	public void setCriteria(criteria crt) {
+		this_criteria = crt;
 	};
 	
-	public int getgoaly() {
+	public int getgoal() {
 		return goal;
 	};
 	public void setgoal(int gl) {
 		goal = gl;
 	};
 	
-	boolean matches(Criteria crt)
+	boolean matches(criteria that_criteria)
 	{
-		return criteria.containsAll(crt);
+		return this_criteria.containsAll(that_criteria);
 	}
 	
 	boolean contains(BaseSet another)
