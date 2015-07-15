@@ -1,7 +1,4 @@
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 
 /**
  * 
@@ -13,6 +10,10 @@ import java.util.Map;
  */
 public class inventoryset implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2014952295388849523L;
 	/**
 	      {
 	      "name": "highrollers",

@@ -3,6 +3,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.BitSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -33,18 +34,33 @@ public class ProcessInput {
 
 			System.out.println(inventorydata.toString());
 
-			Set<criteria> criteria_set = new HashSet<criteria>();
+			Set<criteria> criteria_sets = new HashSet<criteria>();
 
 			// Create filter for criteria used in inventory sets
 			for (inventoryset is : inventorydata.getInventorysets())
 			{
-				criteria_set.add(is.getcriteria());
+				criteria_sets.add(is.getcriteria());
 			}
 			
-			System.out.println(criteria_set.toString());
+			System.out.println(criteria_sets.toString());
 			
 			// Filter out segments and create raw inventory
 			
+			HashMap<BitSet, BaseSet> base_sets = new HashMap<BitSet, BaseSet>();
+			
+			// Create inventory sets data
+			int index = 0;
+			for (inventoryset is : inventorydata.getInventorysets())
+			{
+				index++;
+				BaseSet tmp = new BaseSet();
+				tmp.setkey(index);
+				tmp.setname(is.getName());
+				tmp.setCriteria(is.getcriteria());
+				base_sets.put(tmp.getkey(), tmp);
+			}
+
+			System.out.println(base_sets.toString());
 
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -1,8 +1,6 @@
 
 	import java.io.File;
 	import java.io.IOException;
-	import java.util.ArrayList;
-	import java.util.HashMap;
 	import java.util.List;
 	 
 	import com.fasterxml.jackson.core.JsonFactory;
@@ -27,7 +25,6 @@
 	         
 	        if (getInputType(jsonParser) == "inventorysets")
 	        {
-	        	String invset;
 	        	parseInventorySet(jsonParser);
 		        System.out.println("Employee Object\n\n");
 	        }

@@ -1,3 +1,4 @@
+import java.util.BitSet;
 
 //    {
 //      "name": "highrollers",
@@ -29,11 +30,16 @@
 //    }
     
 public class BaseSet {
-	private String name;
+	private String name=null;
 	private criteria this_criteria;
 	private int availablity = 0;
-	private int goal;
-	private long unionOf = 0;
+	private int goal=0;
+	private BitSet key;
+	
+	BaseSet() {
+		this_criteria = new criteria();
+		key = new BitSet();
+	}
 	
 	public String getname() {
 		return name;
@@ -41,6 +47,12 @@ public class BaseSet {
 	public void setname(String nm) {
 		name = nm;
 	};
+	public void setkey(int index) {
+		key.set(index);
+	}
+	public BitSet getkey() {
+		return key;
+	}
 	
 	public criteria getCriteria() {
 		return this_criteria;
@@ -58,12 +70,14 @@ public class BaseSet {
 	
 	boolean matches(criteria that_criteria)
 	{
-		return this_criteria.containsAll(that_criteria);
+		return this_criteria.matches(that_criteria);
 	}
 	
 	boolean contains(BaseSet another)
 	{
-		return ((unionOf & another.unionOf) == another.unionOf);
+		BitSet tmp = key;
+		tmp.or(another.key);
+		return (tmp == key);
 	}
 	
 	boolean modifyAvailablity(int change)
@@ -76,9 +90,9 @@ public class BaseSet {
 		else return false;
 	}
 	
-	void addMember(long memberBitmap)
+	void unionWith(BaseSet another)
 	{
-		unionOf |= memberBitmap;
+		key.or(another.key);
 	}
 
 }

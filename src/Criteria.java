@@ -17,6 +17,11 @@ public class criteria extends HashMap<String, HashSet<String>> implements Serial
 	/**
 	 * 
 	 */
+	private static final long serialVersionUID = -2146129670317599931L;
+
+	/**
+	 * 
+	 */
 	public criteria() {
 		// TODO Auto-generated constructor stub
 	}
@@ -26,7 +31,7 @@ public class criteria extends HashMap<String, HashSet<String>> implements Serial
 		putAll(is.getcriteria());
 	}
 
-	public boolean containsAll(criteria another) {
+	public boolean matches(criteria another) {
 		// get this names
 		Set<String> thisNames = keySet();
 		Set<String> anotherNames = another.keySet();

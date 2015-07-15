@@ -11,6 +11,10 @@ import java.io.Serializable;
 public class InventroryData implements Serializable {
 
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1654333881795619159L;
+	/**
   "version": 1,
   "owner": "me",
   "name": "choices for me",
