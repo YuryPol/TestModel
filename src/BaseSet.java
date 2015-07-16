@@ -1,3 +1,6 @@
+import java.sql.Blob;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.BitSet;
 
 //    {
@@ -95,4 +98,20 @@ public class BaseSet {
 		key.or(another.key);
 	}
 
+	public Blob getKeyBlob(Connection con) throws SQLException 
+	{
+	    byte[] byteArray = key.toByteArray();	    
+	    Blob blob = con.createBlob(); //con is your database connection created with DriverManager.getConnection();	    
+	    blob.setBytes(1, byteArray);	 
+	    
+	    return blob;
+	}
+	 
+	public BitSet setKeyBlob(Blob blob) throws SQLException {
+	    byte[] bytes = blob.getBytes(1, (int)blob.length());
+	    BitSet bitSet = BitSet.valueOf(bytes);
+	 
+	    return bitSet;
+	}
+	 
 }

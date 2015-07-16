@@ -3,6 +3,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -59,6 +62,31 @@ public class ProcessInput {
 				tmp.setCriteria(is.getcriteria());
 				base_sets.put(tmp.getkey(), tmp);
 			}
+			
+			// account for inclusion 
+			for (BaseSet bs : base_sets.values())
+			{
+				for (BaseSet bs1 : base_sets.values())
+				{
+					if (bs.getkey() == bs1.getkey())
+						continue;
+						
+					if (bs.getCriteria().matches(bs1.getCriteria()))
+					{
+						bs.getkey().or(bs1.getkey());
+					}
+				}
+			}
+			
+			
+			// Write raw inventory into DB
+	        Connection con = null;
+	        Statement st = null;
+	        PreparedStatement insertStatement = null;
+	        String url = "jdbc:mysql://localhost:3306/test_fia";
+	        String user = "root";
+	        String password = "password";
+			
 
 			System.out.println(base_sets.toString());
 
