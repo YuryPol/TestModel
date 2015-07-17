@@ -114,4 +114,13 @@ public class BaseSet {
 	    return bitSet;
 	}
 	 
+	public byte[] getKeyVarBin()
+	{
+	    return key.toByteArray();	    
+	}
+	 
+	public BitSet setKeyVarBin(byte[] bytes) {
+	    return BitSet.valueOf(bytes);
+	}
+
 }

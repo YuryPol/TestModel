@@ -4,12 +4,16 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
  
 
 public class ProcessInput {
@@ -19,7 +23,7 @@ public class ProcessInput {
 		byte[] jsonData = null;
 		String test;
 		try {
-			jsonData = Files.readAllBytes(Paths.get("C:/Users/ypolyako/Downloads/inventory.json"));
+			jsonData = Files.readAllBytes(Paths.get("C:/Users/ypolyako/Downloads/Inventory (1).json"));
 			test = new String(jsonData);
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
@@ -51,44 +55,79 @@ public class ProcessInput {
 			
 			HashMap<BitSet, BaseSet> base_sets = new HashMap<BitSet, BaseSet>();
 			
-			// Create inventory sets data
+			// Create inventory sets data. TODO: write into DB from the start
 			int index = 0;
 			for (inventoryset is : inventorydata.getInventorysets())
 			{
-				index++;
 				BaseSet tmp = new BaseSet();
 				tmp.setkey(index);
 				tmp.setname(is.getName());
 				tmp.setCriteria(is.getcriteria());
 				base_sets.put(tmp.getkey(), tmp);
+				index++;
 			}
 			
 			// account for inclusion 
 			for (BaseSet bs : base_sets.values())
 			{
 				for (BaseSet bs1 : base_sets.values())
-				{
-					if (bs.getkey() == bs1.getkey())
-						continue;
-						
+				{					
 					if (bs.getCriteria().matches(bs1.getCriteria()))
 					{
 						bs.getkey().or(bs1.getkey());
 					}
 				}
-			}
+			}			
 			
-			
-			// Write raw inventory into DB
+			System.out.println(base_sets.toString());
+
+			// Write inventories into DB
 	        Connection con = null;
 	        Statement st = null;
 	        PreparedStatement insertStatement = null;
-	        String url = "jdbc:mysql://localhost:3306/test_fia";
+	        String url = "jdbc:mysql://localhost:3306/demo";
 	        String user = "root";
-	        String password = "password";
+	        String password = "IraAnna12";
 			
+	        try {
+	            con = DriverManager.getConnection(url, user, password);
+	            
+	            // clear everything
+	            st = con.createStatement();
+	            st.executeUpdate("DELETE FROM raw_inventory"); 
+	            st.executeUpdate("DELETE FROM structured_data"); 
+	            
+	            // populate tables
+	            insertStatement = con.prepareStatement
+	            		("INSERT IGNORE INTO structured_data SET set_key = ?, set_name = ?");
+	            for (BaseSet bs1 : base_sets.values()) {
+	            	insertStatement.setBytes(1, bs1.getKeyVarBin());
+		            insertStatement.setString(2, bs1.getname());
+		            insertStatement.execute();
+	            }
 
-			System.out.println(base_sets.toString());
+	        } catch (SQLException ex) {
+	            Logger lgr = Logger.getLogger(GenInput.class.getName());
+	            lgr.log(Level.SEVERE, ex.getMessage(), ex);
+
+	        } finally {
+	            try {
+	                if (st != null) {
+	                    st.close();
+	                }
+	                if (insertStatement != null) {
+	                	insertStatement.close();
+	                }
+	                if (con != null) {
+	                    con.close();
+	                }
+
+	            } catch (SQLException ex) {
+	                Logger lgr = Logger.getLogger(GenInput.class.getName());
+	                lgr.log(Level.WARNING, ex.getMessage(), ex);
+	            }
+	        }
+
 
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -19,23 +19,31 @@ use test_fia;
 -- check results
 -- 
 
+CREATE DATABASE Demo;
+
+USE Demo;
 
 -- create raw_inventory table to fill up by 
-CREATE TABLE raw_inventory (
-	criteia BIGINT NOT NULL, 
-    count INT,
-    PRIMARY KEY (criteia));    
--- populated by GenInput.java
+CREATE TABLE raw_inventory(
+	basesets VARBINARY(10) NOT NULL, 
+	count INT NOT NULL,
+    PRIMARY KEY (basesets));    
+-- populated by ProcessInput.java
 
 DROP TABLE IF EXISTS struct_data;
 
 -- creating structured data 
-CREATE TABLE struct_data (
-    set_map BIGINT, 
-    full_count INT, 
-    availability INT, 
-    goal INT);
-    
+CREATE TABLE structured_data(
+    set_key VARBINARY(10) NOT NULL,
+	set_name VARCHAR(20) DEFAULT NULL,
+    capacity INT NOT NULL  DEFAULT 0, 
+    availability INT DEFAULT 0, 
+    goal INT DEFAULT 0,
+	PRIMARY KEY(set_key));
+	
+select hex(set_key), set_name from structured_data;	
+select CONV(hex(set_key),16,2), set_name from structured_data;	
+
 -- and filling them with raw_inventory
 DROP PROCEDURE IF EXISTS GetStructData;
  DELIMITER //
