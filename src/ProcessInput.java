@@ -23,7 +23,7 @@ public class ProcessInput {
 		byte[] jsonData = null;
 		String test;
 		try {
-			jsonData = Files.readAllBytes(Paths.get("C:/Users/ypolyako/Downloads/Inventory (1).json"));
+			jsonData = Files.readAllBytes(Paths.get("C:/Users/ypolyako/Downloads/Inventory (2).json"));
 			test = new String(jsonData);
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
@@ -59,7 +59,7 @@ public class ProcessInput {
 			int index = 0;
 			for (inventoryset is : inventorydata.getInventorysets())
 			{
-				BaseSet tmp = new BaseSet();
+				BaseSet tmp = new BaseSet(64);
 				tmp.setkey(index);
 				tmp.setname(is.getName());
 				tmp.setCriteria(is.getcriteria());
@@ -101,7 +101,8 @@ public class ProcessInput {
 	            insertStatement = con.prepareStatement
 	            		("INSERT IGNORE INTO structured_data SET set_key = ?, set_name = ?");
 	            for (BaseSet bs1 : base_sets.values()) {
-	            	insertStatement.setBytes(1, bs1.getKeyVarBin());
+	            	// insertStatement.setBytes(1, bs1.getKeyVarBin());
+	            	insertStatement.setLong(1, bs1.getKeyBin()[0]);
 		            insertStatement.setString(2, bs1.getname());
 		            insertStatement.execute();
 	            }

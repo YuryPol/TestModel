@@ -44,6 +44,11 @@ public class BaseSet {
 		key = new BitSet();
 	}
 	
+	public BaseSet(int i) {
+		this_criteria = new criteria();
+		key = new BitSet(i);
+	}
+
 	public String getname() {
 		return name;
 	};
@@ -114,13 +119,13 @@ public class BaseSet {
 	    return bitSet;
 	}
 	 
-	public byte[] getKeyVarBin()
+	public long[] getKeyBin()
 	{
-	    return key.toByteArray();	    
+	    return key.toLongArray();	    
 	}
 	 
-	public BitSet setKeyVarBin(byte[] bytes) {
-	    return BitSet.valueOf(bytes);
+	public BitSet setKeyVarBin(long[] words) {
+	    return BitSet.valueOf(words);
 	}
 
 }

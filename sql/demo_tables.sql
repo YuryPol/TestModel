@@ -24,8 +24,9 @@ CREATE DATABASE Demo;
 USE Demo;
 
 -- create raw_inventory table to fill up by 
+DROP TABLE raw_inventory;
 CREATE TABLE raw_inventory(
-	basesets VARBINARY(10) NOT NULL, 
+	basesets BINARY(10) NOT NULL, 
 	count INT NOT NULL,
     PRIMARY KEY (basesets));    
 -- populated by ProcessInput.java
@@ -33,16 +34,17 @@ CREATE TABLE raw_inventory(
 DROP TABLE IF EXISTS struct_data;
 
 -- creating structured data 
+DROP TABLE structured_data;
 CREATE TABLE structured_data(
-    set_key VARBINARY(10) NOT NULL,
+    set_key BINARY(10) DEFAULT NULL,
 	set_name VARCHAR(20) DEFAULT NULL,
-    capacity INT NOT NULL  DEFAULT 0, 
+    capacity INT NOT NULL DEFAULT 0, 
     availability INT DEFAULT 0, 
     goal INT DEFAULT 0,
 	PRIMARY KEY(set_key));
 	
 select hex(set_key), set_name from structured_data;	
-select CONV(hex(set_key),16,2), set_name from structured_data;	
+select lpad(CONV(set_key,10,2), 20, '0'), set_name from structured_data;	
 
 -- and filling them with raw_inventory
 DROP PROCEDURE IF EXISTS GetStructData;
