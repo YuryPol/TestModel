@@ -17,6 +17,8 @@ import java.util.logging.Logger;
  
 
 public class ProcessInput {
+	
+	static int BITMAP_ZIZE = 64;
 
 	public static void main(String[] args) 
 	{
@@ -43,7 +45,7 @@ public class ProcessInput {
 
 			Set<criteria> criteria_sets = new HashSet<criteria>();
 
-			// Create filter for criteria used in inventory sets
+			// Create filter for criteria used in inventory sets for debugging. TODO: remove
 			for (inventoryset is : inventorydata.getInventorysets())
 			{
 				criteria_sets.add(is.getcriteria());
@@ -59,7 +61,7 @@ public class ProcessInput {
 			int index = 0;
 			for (inventoryset is : inventorydata.getInventorysets())
 			{
-				BaseSet tmp = new BaseSet(64);
+				BaseSet tmp = new BaseSet(BITMAP_ZIZE);
 				tmp.setkey(index);
 				tmp.setname(is.getName());
 				tmp.setCriteria(is.getcriteria());
@@ -77,9 +79,31 @@ public class ProcessInput {
 						bs.getkey().or(bs1.getkey());
 					}
 				}
-			}			
+			}
 			
 			System.out.println(base_sets.toString());
+			
+			// Create segments' raw data. TODO: write into DB from the start
+			HashMap<BitSet, BaseSegement> base_segments = new HashMap<BitSet, BaseSegement>();
+
+			for (segment seg : inventorydata.getSegments())
+			{
+				BaseSegement tmp = new BaseSegement(BITMAP_ZIZE);
+				tmp.setCriteria(seg.getcriteria());
+				
+				for (BaseSet bs1 : base_sets.values())
+				{					
+					if (tmp.getCriteria().matches(bs1.getCriteria()))
+					{
+						tmp.getkey().or(bs1.getkey());
+					}
+					if (!tmp.getkey().equals(0)) 
+						tmp.setcapacity(seg.getCount());
+				}
+				base_segments.put(tmp.getkey(), tmp);			
+			}
+			
+			System.out.println(base_segments.toString());
 
 			// Write inventories into DB
 	        Connection con = null;
@@ -98,12 +122,23 @@ public class ProcessInput {
 	            st.executeUpdate("DELETE FROM structured_data"); 
 	            
 	            // populate tables
+	            
+	            // structured data with inventory sets
 	            insertStatement = con.prepareStatement
 	            		("INSERT IGNORE INTO structured_data SET set_key = ?, set_name = ?");
 	            for (BaseSet bs1 : base_sets.values()) {
 	            	// insertStatement.setBytes(1, bs1.getKeyVarBin());
 	            	insertStatement.setLong(1, bs1.getKeyBin()[0]);
 		            insertStatement.setString(2, bs1.getname());
+		            insertStatement.execute();
+	            }
+	            
+	            // raw data with inventory sets' bitmaps
+	            insertStatement = con.prepareStatement
+	            		("INSERT IGNORE INTO raw_inventory SET set_key = ?, capacity = ?");
+	            for (BaseSegement bs1 : base_segments.values()) {
+	            	insertStatement.setLong(1, bs1.getKeyBin()[0]);
+	            	insertStatement.setInt(2, bs1.getcapacity());
 		            insertStatement.execute();
 	            }
 

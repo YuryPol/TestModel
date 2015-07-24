@@ -1,4 +1,4 @@
-*.xml
+# *.xml
 *.lock
 *.dat
 *.version
@@ -22,8 +22,8 @@ scripts/.metadata/
 *.ear
 
 # eclipse debris #
-.classpath
-.project
+# .classpath
+# .project
 .settings/
 .metadata/
 
