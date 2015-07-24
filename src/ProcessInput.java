@@ -96,11 +96,10 @@ public class ProcessInput {
 					if (tmp.getCriteria().matches(bs1.getCriteria()))
 					{
 						tmp.getkey().or(bs1.getkey());
-					}
-					if (!tmp.getkey().equals(0)) 
 						tmp.setcapacity(seg.getCount());
+						base_segments.put(tmp.getkey(), tmp);
+					}
 				}
-				base_segments.put(tmp.getkey(), tmp);			
 			}
 			
 			System.out.println(base_segments.toString());
@@ -141,7 +140,6 @@ public class ProcessInput {
 	            	insertStatement.setInt(2, bs1.getcapacity());
 		            insertStatement.execute();
 	            }
-
 	        } catch (SQLException ex) {
 	            Logger lgr = Logger.getLogger(GenInput.class.getName());
 	            lgr.log(Level.SEVERE, ex.getMessage(), ex);
@@ -157,16 +155,15 @@ public class ProcessInput {
 	                if (con != null) {
 	                    con.close();
 	                }
-
 	            } catch (SQLException ex) {
 	                Logger lgr = Logger.getLogger(GenInput.class.getName());
 	                lgr.log(Level.WARNING, ex.getMessage(), ex);
 	            }
 	        }
-
-
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 }
+	
