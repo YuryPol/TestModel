@@ -45,6 +45,7 @@ CREATE TABLE structured_data(
 	
 select hex(set_key), set_name from structured_data;	
 select lpad(CONV(set_key,10,2), 20, '0'), set_name from structured_data;	
+select lpad(CONV(basesets,10,2), 20, '0'), count from raw_inventory;	
 
 -- and filling them with raw_inventory
 DROP PROCEDURE IF EXISTS GetStructData;

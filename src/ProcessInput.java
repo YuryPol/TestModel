@@ -25,7 +25,7 @@ public class ProcessInput {
 		byte[] jsonData = null;
 		String test;
 		try {
-			jsonData = Files.readAllBytes(Paths.get("C:/Users/ypolyako/Downloads/Inventory (2).json"));
+			jsonData = Files.readAllBytes(Paths.get("C:/Users/ypolyako/Downloads/Inventory (3).json"));
 			test = new String(jsonData);
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
@@ -93,10 +93,10 @@ public class ProcessInput {
 				
 				for (BaseSet bs1 : base_sets.values())
 				{					
-					if (tmp.getCriteria().matches(bs1.getCriteria()))
+					if (bs1.getCriteria().matches(tmp.getCriteria()))
 					{
 						tmp.getkey().or(bs1.getkey());
-						tmp.setcapacity(seg.getCount());
+						tmp.setcount(seg.getCount());
 						base_segments.put(tmp.getkey(), tmp);
 					}
 				}
@@ -134,7 +134,7 @@ public class ProcessInput {
 	            
 	            // raw data with inventory sets' bitmaps
 	            insertStatement = con.prepareStatement
-	            		("INSERT IGNORE INTO raw_inventory SET set_key = ?, capacity = ?");
+	            		("INSERT IGNORE INTO raw_inventory SET basesets = ?, count = ?");
 	            for (BaseSegement bs1 : base_segments.values()) {
 	            	insertStatement.setLong(1, bs1.getKeyBin()[0]);
 	            	insertStatement.setInt(2, bs1.getcapacity());

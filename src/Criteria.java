@@ -1,4 +1,5 @@
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -41,7 +42,8 @@ public class criteria extends HashMap<String, HashSet<String>> implements Serial
 		    // check elements
 		    for (String name: thisNames) {
 		    	HashSet<String> anotherValues = another.get(name);
-		    	if (!anotherValues.containsAll(get(name)))
+		    	HashSet<String> thisValues = get(name);
+		    	if (Collections.disjoint(thisValues, anotherValues))
 		    		// criteron's values are OR-ed with each other
 		    		return false;
 		    }
