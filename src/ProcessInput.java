@@ -41,8 +41,6 @@ public class ProcessInput {
 			//convert json input to object
 			InventroryData inventorydata= objectMapper.readValue(jsonData, InventroryData.class);
 
-			System.out.println(inventorydata.toString());
-
 			Set<criteria> criteria_sets = new HashSet<criteria>();
 
 			// Create filter for criteria used in inventory sets for debugging. TODO: remove
@@ -74,7 +72,7 @@ public class ProcessInput {
 			{
 				for (BaseSet bs1 : base_sets.values())
 				{					
-					if (bs.getCriteria().matches(bs1.getCriteria()))
+					if (bs.contains(bs1.getCriteria()))
 					{
 						bs.getkey().or(bs1.getkey());
 					}
@@ -102,7 +100,7 @@ public class ProcessInput {
 				}
 			}
 			
-			System.out.println(base_segments.toString());
+			System.out.println(base_segments.values().toArray().toString());
 
 			// Write inventories into DB
 	        Connection con = null;
