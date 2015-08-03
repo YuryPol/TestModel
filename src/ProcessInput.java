@@ -18,7 +18,7 @@ import java.util.logging.Logger;
 
 public class ProcessInput {
 	
-	static int BITMAP_ZIZE = 64;
+	static int BITMAP_SIZE = 64;
 
 	public static void main(String[] args) 
 	{
@@ -61,7 +61,7 @@ public class ProcessInput {
 			int index = 0;
 			for (inventoryset is : inventorydata.getInventorysets())
 			{
-				BaseSet tmp = new BaseSet(BITMAP_ZIZE);
+				BaseSet tmp = new BaseSet(BITMAP_SIZE);
 				tmp.setkey(index);
 				tmp.setname(is.getName());
 				tmp.setCriteria(is.getcriteria());
@@ -88,7 +88,7 @@ public class ProcessInput {
 
 			for (segment seg : inventorydata.getSegments())
 			{
-				BaseSegement tmp = new BaseSegement(BITMAP_ZIZE);
+				BaseSegement tmp = new BaseSegement(BITMAP_SIZE);
 				tmp.setCriteria(seg.getcriteria());
 				
 				for (BaseSet bs1 : base_sets.values())

@@ -11,7 +11,7 @@ use test_fia;
 -- call GetWeightRawData;
 -- call GetStructData;
 -- start alotments 
--- select bin(set_map), set_map, full_count, availability, goal from struct_data where BIT_COUNT(set_map)=1;
+-- select bin(set_map), set_map, full_count, availability, goal from structured_data where BIT_COUNT(set_map)=1;
 -- deside on criteria, ammount
 -- call GetItems(criteria, ammount);
 --  -"- repeat until done
@@ -23,15 +23,13 @@ CREATE DATABASE Demo;
 
 USE Demo;
 
--- create raw_inventory table to fill up by 
+-- create raw_inventory table to fill up by impressons' counts
 DROP TABLE raw_inventory;
 CREATE TABLE raw_inventory(
 	basesets BINARY(10) NOT NULL, 
 	count INT NOT NULL,
     PRIMARY KEY (basesets));    
 -- populated by ProcessInput.java
-
-DROP TABLE IF EXISTS struct_data;
 
 -- creating structured data 
 DROP TABLE structured_data;
@@ -42,25 +40,29 @@ CREATE TABLE structured_data(
     availability INT DEFAULT 0, 
     goal INT DEFAULT 0,
 	PRIMARY KEY(set_key));
+-- populated by ProcessInput.java except capacity and availability
 	
 select hex(set_key), set_name from structured_data;	
-select lpad(CONV(set_key,10,2), 20, '0'), set_name from structured_data;	
+select lpad(CONV(set_key,10,2), 20, '0'), set_name, capacity, availability from structured_data;	
 select lpad(CONV(basesets,10,2), 20, '0'), count from raw_inventory;	
 
--- and filling them with raw_inventory
+-- filling structured_data with capacity and availability from raw_inventory 
 DROP PROCEDURE IF EXISTS GetStructData;
  DELIMITER //
  CREATE PROCEDURE GetStructData()
    BEGIN
-    delete from struct_data;    
-    INSERT INTO struct_data
-    SELECT set_map, SUM(full_count), SUM(full_count), 0 FROM (
-    SELECT r1.criteia AS set_map, r2.count AS full_count
-    FROM raw_inventory r1
-    LEFT OUTER JOIN raw_inventory r2
-    ON r1.criteia & r2.criteia) tmp
-    WHERE full_count IS NOT NULL
-    GROUP BY set_map
+    UPDATE structured_data 
+	LEFT JOIN (
+		SELECT set_map, SUM(full_count) FROM (
+			SELECT r1.basesets AS set_map, r2.count AS full_count
+			FROM raw_inventory r1
+			LEFT OUTER JOIN raw_inventory r2
+			ON r1.criteia & r2.criteia) tmp
+		WHERE full_count IS NOT NULL
+		GROUP BY set_map
+	) tmp2
+	ON (set_key )
+	SET capacity=full_count, availability=full_count
     ;
    END //
  DELIMITER ;
@@ -72,16 +74,16 @@ DROP PROCEDURE IF EXISTS GetStructData;
    BEGIN
     DECLARE cnt INT;
    
-    SELECT availability INTO cnt FROM struct_data WHERE set_map = iset;
+    SELECT availability INTO cnt FROM structured_data WHERE set_map = iset;
  
     IF cnt >= amount AND amount > 0 AND BIT_COUNT(iset)=1
     THEN
 	 SELECT 'ok';
-     UPDATE struct_data set availability=availability-amount WHERE (set_map & iset)>0;
-     UPDATE struct_data set goal=goal+amount WHERE set_map = iset;
+     UPDATE structured_data set availability=availability-amount WHERE (set_map & iset)>0;
+     UPDATE structured_data set goal=goal+amount WHERE set_map = iset;
      DROP TABLE IF EXISTS struct_data_tmp;
-     CREATE TABLE struct_data_tmp SELECT * FROM struct_data;
-     UPDATE struct_data sd SET availability = (SELECT min(sdt.availability) FROM struct_data_tmp sdt
+     CREATE TABLE struct_data_tmp SELECT * FROM structured_data;
+     UPDATE structured_data sd SET availability = (SELECT min(sdt.availability) FROM struct_data_tmp sdt
        WHERE (sd.set_map & sdt.set_map) = sd.set_map AND sd.set_map <= sdt.set_map);
 	ELSE
      SELECT 'not ok';
@@ -90,9 +92,9 @@ DROP PROCEDURE IF EXISTS GetStructData;
  DELIMITER ;
  
 select bin(set_map), set_map, full_count, availability, goal 
-from struct_data;
+from structured_data;
 
-select * from struct_data;
+select * from structured_data;
 
 -- create weighted data table for run-time testing
 create table raw_data_weighted(criteia BIGINT NOT NULL, 
