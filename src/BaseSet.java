@@ -2,6 +2,9 @@ import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.BitSet;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 //    {
 //      "name": "highrollers",
@@ -76,11 +79,29 @@ public class BaseSet {
 		goal = gl;
 	};
 	
-	boolean matches(criteria that_criteria)
-	{
-		return this_criteria.matches(that_criteria);
+	public boolean contains(criteria another) {
+		// get this names
+		Set<String> thisNames = this_criteria.keySet();
+		Set<String> anotherNames = another.keySet();
+		if (anotherNames.containsAll(thisNames))
+		{
+			// another criteria contains all names of this one, so it is more (or the same) specific
+		    // check elements
+		    for (String name: thisNames) {
+		    	HashSet<String> anotherValues = another.get(name);
+		    	HashSet<String> thisValues = this_criteria.get(name);
+		    	if (!thisValues.containsAll(anotherValues))
+		    		// this criteria does not contain all another's criteria values so it is more specific
+		    		return false;
+		    }
+			return true;
+		}
+		else
+			// it defies the common sense as each criterion AND-ed with others 
+			// fewer selection criteria means wider set
+			return false;
 	}
-	
+
 	boolean contains(BaseSet another)
 	{
 		BitSet tmp = key;
