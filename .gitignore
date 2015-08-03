@@ -26,6 +26,7 @@ scripts/.metadata/
 # .project
 .settings/
 .metadata/
+.classpath
 
 # misc build artifacts #
 target/
