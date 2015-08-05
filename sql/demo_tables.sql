@@ -26,7 +26,7 @@ USE Demo;
 -- create raw_inventory table to fill up by impressons' counts
 DROP TABLE raw_inventory;
 CREATE TABLE raw_inventory(
-	basesets BINARY(10) NOT NULL, 
+	basesets BIGINT NOT NULL, 
 	count INT NOT NULL,
     PRIMARY KEY (basesets));    
 -- populated by ProcessInput.java
@@ -34,7 +34,7 @@ CREATE TABLE raw_inventory(
 -- creating structured data 
 DROP TABLE structured_data;
 CREATE TABLE structured_data(
-    set_key BINARY(10) DEFAULT NULL,
+    set_key BIGINT DEFAULT NULL,
 	set_name VARCHAR(20) DEFAULT NULL,
     capacity INT NOT NULL DEFAULT 0, 
     availability INT DEFAULT 0, 
@@ -42,27 +42,36 @@ CREATE TABLE structured_data(
 	PRIMARY KEY(set_key));
 -- populated by ProcessInput.java except capacity and availability
 	
-select hex(set_key), set_name from structured_data;	
-select lpad(CONV(set_key,10,2), 20, '0'), set_name, capacity, availability from structured_data;	
-select lpad(CONV(basesets,10,2), 20, '0'), count from raw_inventory;	
+--select hex(set_key), set_name from structured_data;	
+--select lpad(CONV(set_key,10,2), 20, '0'), set_name, capacity, availability from structured_data;	
+--select lpad(CONV(basesets,10,2), 20, '0'), count from raw_inventory;	
+
+select lpad(bin(set_key), 20, '0'), set_name, capacity, availability from structured_data;	
+select lpad(bin(basesets), 20, '0'), count from raw_inventory;	
+select lpad(bin(set_key), 20, '0'), capacity from structured_data_counts;	
 
 -- filling structured_data with capacity and availability from raw_inventory 
+-- creating structured data 
+DROP TABLE structured_data_counts;
+CREATE TABLE structured_data_counts(
+    set_key BIGINT DEFAULT NULL,
+    capacity BIGINT NOT NULL DEFAULT 0, 
+	PRIMARY KEY(set_key));
+-- populated by ProcessInput.java except capacity and availability
+
 DROP PROCEDURE IF EXISTS GetStructData;
  DELIMITER //
  CREATE PROCEDURE GetStructData()
    BEGIN
-    UPDATE structured_data 
-	LEFT JOIN (
-		SELECT set_map, SUM(full_count) FROM (
-			SELECT r1.basesets AS set_map, r2.count AS full_count
-			FROM raw_inventory r1
-			LEFT OUTER JOIN raw_inventory r2
-			ON r1.criteia & r2.criteia) tmp
-		WHERE full_count IS NOT NULL
-		GROUP BY set_map
-	) tmp2
-	ON (set_key )
-	SET capacity=full_count, availability=full_count
+    delete from structured_data_counts;    
+    INSERT INTO structured_data_counts
+    SELECT set_key, SUM(full_count) FROM (
+    SELECT r1.basesets | r2.basesets AS set_key, r2.count AS full_count
+    FROM raw_inventory r1
+    LEFT OUTER JOIN raw_inventory r2
+    ON r1.basesets & r2.basesets) tmp
+    WHERE full_count IS NOT NULL
+    GROUP BY set_key
     ;
    END //
  DELIMITER ;

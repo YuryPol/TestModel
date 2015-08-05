@@ -14,7 +14,7 @@ import java.util.BitSet;
 public class BaseSegement {
 
 	private criteria this_criteria;
-	private int count = 0;
+	private int capacity = 0;
 	private BitSet key;
 
 	BaseSegement() {
@@ -42,10 +42,10 @@ public class BaseSegement {
 	};
 	
 	public int getcapacity() {
-		return count;
+		return capacity;
 	};
-	public void setcount(int cp) {
-		count = cp;
+	public void setcapacity(int cp) {
+		capacity = cp;
 	};
 	
 	boolean matches(criteria that_criteria)
