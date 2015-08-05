@@ -94,7 +94,13 @@ public class ProcessInput {
 					if (bs1.getCriteria().matches(tmp.getCriteria()))
 					{
 						tmp.getkey().or(bs1.getkey());
-						tmp.setcount(seg.getCount());
+
+						int old_capacity = 0;
+						if (base_segments.get(tmp.getkey()) != null)
+						{
+							old_capacity = tmp.getcapacity();
+						}
+						tmp.setcapacity(old_capacity + seg.getCount());
 						base_segments.put(tmp.getkey(), tmp);
 					}
 				}
