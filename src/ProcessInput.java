@@ -3,6 +3,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -41,32 +42,31 @@ public class ProcessInput {
 			//convert json input to object
 			InventroryData inventorydata= objectMapper.readValue(jsonData, InventroryData.class);
 
-			Set<criteria> criteria_sets = new HashSet<criteria>();
-
 			// Create filter for criteria used in inventory sets for debugging. TODO: remove
+			Set<criteria> criteria_sets = new HashSet<criteria>();
 			for (inventoryset is : inventorydata.getInventorysets())
 			{
 				criteria_sets.add(is.getcriteria());
-			}
-			
+			}			
 			System.out.println(criteria_sets.toString());
 			
-			// Filter out segments and create raw inventory
-			
-			HashMap<BitSet, BaseSet> base_sets = new HashMap<BitSet, BaseSet>();
-			
 			// Create inventory sets data. TODO: write into DB from the start
-			int index = 0;
+			HashMap<BitSet, BaseSet> base_sets = new HashMap<BitSet, BaseSet>();			
+			int highBit = 0;
 			for (inventoryset is : inventorydata.getInventorysets())
 			{
 				BaseSet tmp = new BaseSet(BITMAP_SIZE);
-				tmp.setkey(index);
+				tmp.setkey(highBit);
 				tmp.setname(is.getName());
 				tmp.setCriteria(is.getcriteria());
 				base_sets.put(tmp.getkey(), tmp);
-				index++;
+				highBit++;
 			}
-			
+			if (highBit == 0)
+			{
+				System.out.println("no data in inventory sets");
+				return;
+			}			
 			// account for inclusion 
 			for (BaseSet bs : base_sets.values())
 			{
@@ -77,13 +77,11 @@ public class ProcessInput {
 						bs.getkey().or(bs1.getkey());
 					}
 				}
-			}
-			
+			}			
 			System.out.println(base_sets.toString());
 			
 			// Create segments' raw data. TODO: write into DB from the start
 			HashMap<BitSet, BaseSegement> base_segments = new HashMap<BitSet, BaseSegement>();
-
 			for (segment seg : inventorydata.getSegments())
 			{
 				BaseSegement tmp = new BaseSegement(BITMAP_SIZE);
@@ -104,13 +102,15 @@ public class ProcessInput {
 						base_segments.put(tmp.getkey(), tmp);
 					}
 				}
-			}
-			
+			}			
 			System.out.println(base_segments.values().toArray().toString());
 
+			//
 			// Write inventories into DB
+			//
 	        Connection con = null;
 	        Statement st = null;
+	        CallableStatement cs = null;
 	        PreparedStatement insertStatement = null;
 	        String url = "jdbc:mysql://localhost:3306/demo";
 	        String user = "root";
@@ -124,9 +124,7 @@ public class ProcessInput {
 	            st.executeUpdate("DELETE FROM raw_inventory"); 
 	            st.executeUpdate("DELETE FROM structured_data"); 
 	            
-	            // populate tables
-	            
-	            // structured data with inventory sets
+	            // populate structured data with inventory sets
 	            insertStatement = con.prepareStatement
 	            		("INSERT IGNORE INTO structured_data SET set_key = ?, set_name = ?");
 	            for (BaseSet bs1 : base_sets.values()) {
@@ -136,7 +134,7 @@ public class ProcessInput {
 		            insertStatement.execute();
 	            }
 	            
-	            // raw data with inventory sets' bitmaps
+	            // populate raw data with inventory sets' bitmaps
 	            insertStatement = con.prepareStatement
 	            		("INSERT IGNORE INTO raw_inventory SET basesets = ?, count = ?");
 	            for (BaseSegement bs1 : base_segments.values()) {
@@ -144,6 +142,14 @@ public class ProcessInput {
 	            	insertStatement.setInt(2, bs1.getcapacity());
 		            insertStatement.execute();
 	            }
+	            
+	            // populate inventory sets and unions template
+	            cs = con.prepareCall("{call CreateBaseStructData(?)}");
+	            Integer Index = highBit - 1;
+	            cs.setString(1, Index.toString());
+	            cs.executeQuery();
+
+	            
 	        } catch (SQLException ex) {
 	            Logger lgr = Logger.getLogger(GenInput.class.getName());
 	            lgr.log(Level.SEVERE, ex.getMessage(), ex);
