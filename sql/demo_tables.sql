@@ -42,7 +42,7 @@ CREATE TABLE structured_data(
     set_key BIGINT DEFAULT NULL,
 	set_name VARCHAR(20) DEFAULT NULL,
     capacity INT NOT NULL DEFAULT 0, 
-    availability INT DEFAULT 0, 
+    availability INT NOT NULL DEFAULT 0, 
     goal INT DEFAULT 0,
 	PRIMARY KEY(set_key));
 -- populated by ProcessInput.java except capacity and availability
@@ -96,21 +96,28 @@ DROP PROCEDURE IF EXISTS GetStructData;
    END //
  DELIMITER ;
 
+DROP TABLE IF EXISTS BaseStructData;
+CREATE TABLE BaseStructData(
+set_key BIGINT DEFAULT NULL,
+PRIMARY KEY(set_key));
 
--- staff that could be usefull
 DROP PROCEDURE IF EXISTS CreateBaseStructData;
 DELIMITER //
-CREATE PROCEDURE CreateBaseStructData()
+CREATE PROCEDURE CreateBaseStructData(IN highBit INT)
 BEGIN
-   DECLARE set_key INT;
-   SET set_key = 0;
-   label1: REPEAT
-     SET set_key = set_key + 1;
-	 -- insert in the table
-   UNTIL set_key >= POW(2, 20) 
-   END REPEAT label1;
-END; //
+   DECLARE skey INT DEFAULT 1;
+   delete from BaseStructData;
+   WHILE skey & POW(2, highBit) = 0 DO
+     INSERT INTO BaseStructData VALUE(skey);
+     SET skey = skey + 1;
+   END WHILE
+   ;
+END //
 DELIMITER ;
+
+
+
+-- staff that could be usefull
 
 -- filling structured_data with capacity and availability from raw_inventory 
 -- creating structured data 
