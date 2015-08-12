@@ -36,7 +36,9 @@ CREATE TABLE raw_inventory(
     PRIMARY KEY (basesets));    
 -- populated by ProcessInput.java
 
+--
 -- creating structured data 
+--
 DROP TABLE structured_data;
 CREATE TABLE structured_data(
     set_key BIGINT DEFAULT NULL,
@@ -47,42 +49,56 @@ CREATE TABLE structured_data(
 	PRIMARY KEY(set_key));
 -- populated by ProcessInput.java except capacity and availability
 
--- creating structured data 
-DROP TABLE structured_data_counts;
-CREATE TABLE structured_data_counts(
-    set_key BIGINT DEFAULT NULL,
+DROP TABLE IF EXISTS FullStructData;
+CREATE TABLE FullStructData(
+	set_key BIGINT DEFAULT NULL,
 	set_name VARCHAR(20) DEFAULT NULL,
-    capacity INT NOT NULL DEFAULT 0, 
-    availability INT DEFAULT 0, 
-    goal INT DEFAULT 0,
+	capacity INT DEFAULT 0, 
+	availability INT DEFAULT 0, 
+	goal INT DEFAULT 0,
 	PRIMARY KEY(set_key));
--- populated by SetIsAvail with capacity and availability
+-- first populated by ProcessInput.java with stor-proc CreateFullStructData(highBit)
 
--- populate capacity and availability
-DROP PROCEDURE IF EXISTS SetIsAvail;
- DELIMITER //
- CREATE PROCEDURE SetIsAvail()
-   BEGIN
-    delete from structured_data_counts;    
-    INSERT INTO structured_data_counts 
-    SELECT set_key, SUM(full_count), SUM(full_count) FROM (
-		SELECT sd.basesets AS set_key, r2.count AS full_count
-		FROM structured_data sd
-		JOIN raw_inventory r2
-		ON sd.basesets & r2.basesets
-	) tmp
-    WHERE full_count IS NOT NULL
-    GROUP BY set_key
-    ;
-   END //
- DELIMITER ;
+DROP PROCEDURE IF EXISTS CreateFullStructData;
+DELIMITER //
+CREATE PROCEDURE CreateFullStructData(IN highBit INT)
+BEGIN
+   DECLARE skey INT DEFAULT 1;
+   DELETE from FullStructData;
+   WHILE skey & POW(2, highBit) = 0 DO
+     INSERT IGNORE INTO FullStructData VALUES(skey, NULL, 0, 0, 0);
+     SET skey = skey + 1;
+   END WHILE
+   ;
+END //
+DELIMITER ;
 
-	
+DROP PROCEDURE IF EXISTS AddUnionsToStructData;
+DELIMITER //
+CREATE PROCEDURE AddUnionsToStructData()
+BEGIN
+	UPDATE FullStructData fsd 
+	LEFT OUTER JOIN structured_data sd ON fsd.set_key = sd.set_key 
+	-- SET fsd.capacity = REPLACE (fsd.capacity, NULL, sd.capacity)
+	SET 
+	 fsd.set_name = sd.set_name,
+	 fsd.capacity = sd.capacity,
+	 fsd.availability = sd.availability,
+	 fsd.goal = sd.goal
+	;
+END //
+DELIMITER ;
+
+
+
+
+
+
 DROP PROCEDURE IF EXISTS GetStructData;
  DELIMITER //
  CREATE PROCEDURE GetStructData()
    BEGIN
-    delete from structured_data_counts;    
+    DELETE from structured_data_counts;    
     INSERT INTO structured_data_counts
     SELECT set_key, SUM(full_count) FROM (
 		SELECT r1.basesets | r2.basesets AS set_key, r2.count AS full_count
@@ -95,26 +111,6 @@ DROP PROCEDURE IF EXISTS GetStructData;
     ;
    END //
  DELIMITER ;
-
-DROP TABLE IF EXISTS BaseStructData;
-CREATE TABLE BaseStructData(
-set_key BIGINT DEFAULT NULL,
-PRIMARY KEY(set_key));
-
-DROP PROCEDURE IF EXISTS CreateBaseStructData;
-DELIMITER //
-CREATE PROCEDURE CreateBaseStructData(IN highBit INT)
-BEGIN
-   DECLARE skey INT DEFAULT 1;
-   delete from BaseStructData;
-   WHILE skey & POW(2, highBit) = 0 DO
-     INSERT INTO BaseStructData VALUE(skey);
-     SET skey = skey + 1;
-   END WHILE
-   ;
-END //
-DELIMITER ;
-
 
 
 -- staff that could be usefull

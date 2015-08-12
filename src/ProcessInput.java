@@ -123,6 +123,7 @@ public class ProcessInput {
 	            st = con.createStatement();
 	            st.executeUpdate("DELETE FROM raw_inventory"); 
 	            st.executeUpdate("DELETE FROM structured_data"); 
+	            st.executeUpdate("DELETE FROM basestructdata"); 
 	            
 	            // populate structured data with inventory sets
 	            insertStatement = con.prepareStatement
@@ -132,7 +133,17 @@ public class ProcessInput {
 	            	insertStatement.setLong(1, bs1.getKeyBin()[0]);
 		            insertStatement.setString(2, bs1.getname());
 		            insertStatement.execute();
-	            }
+	            }	            
+	            
+	            // populate inventory sets and unions template
+	            cs = con.prepareCall("{call CreateFullStructData(?)}");
+	            Integer Index = highBit;
+	            cs.setString(1, Index.toString());
+	            cs.executeQuery();
+
+	            // add unions to structured data
+	            cs = con.prepareCall("{call AddUnionsToStructData}");
+	            cs.executeQuery();
 	            
 	            // populate raw data with inventory sets' bitmaps
 	            insertStatement = con.prepareStatement
@@ -142,13 +153,6 @@ public class ProcessInput {
 	            	insertStatement.setInt(2, bs1.getcapacity());
 		            insertStatement.execute();
 	            }
-	            
-	            // populate inventory sets and unions template
-	            cs = con.prepareCall("{call CreateBaseStructData(?)}");
-	            Integer Index = highBit - 1;
-	            cs.setString(1, Index.toString());
-	            cs.executeQuery();
-
 	            
 	        } catch (SQLException ex) {
 	            Logger lgr = Logger.getLogger(GenInput.class.getName());
