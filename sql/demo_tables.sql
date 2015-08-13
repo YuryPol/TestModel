@@ -89,39 +89,26 @@ BEGIN
 END //
 DELIMITER ;
 
+DROP PROCEDURE IF EXISTS PopulateStructDataWithNumbers;
+DELIMITER //
+CREATE PROCEDURE PopulateStructDataWithNumbers()
+BEGIN
+ SELECT 
+	set_key,
+	set_name,
+	SUM(capacity), 
+	SUM(availability), 
+	goal
+ FROM (
+	SELECT fsd.set_key, fsd.set_name, ri.count as capacity, ri.count as availability, fsd.goal
+	FROM FullStructData fsd 
+	JOIN raw_inventory ri 
+	ON fsd.set_key & ri.basesets != 0 ) blownUp
+ GROUP BY set_key, set_name
+ ;
+END //
+DELIMITER ;
 
 
-
-
-
-DROP PROCEDURE IF EXISTS GetStructData;
- DELIMITER //
- CREATE PROCEDURE GetStructData()
-   BEGIN
-    DELETE from structured_data_counts;    
-    INSERT INTO structured_data_counts
-    SELECT set_key, SUM(full_count) FROM (
-		SELECT r1.basesets | r2.basesets AS set_key, r2.count AS full_count
-		FROM raw_inventory r1
-		JOIN raw_inventory r2
-		ON r1.basesets & r2.basesets AND r1.basesets != r2.basesets
-	) tmp
-    WHERE full_count IS NOT NULL
-    GROUP BY set_key
-    ;
-   END //
- DELIMITER ;
-
-
--- staff that could be usefull
-
--- filling structured_data with capacity and availability from raw_inventory 
--- creating structured data 
-DROP TABLE structured_data_counts;
-CREATE TABLE structured_data_counts(
-    set_key BIGINT DEFAULT NULL,
-    capacity BIGINT NOT NULL DEFAULT 0, 
-	PRIMARY KEY(set_key));
--- populated by ProcessInput.java except capacity and availability
 
 

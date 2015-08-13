@@ -9,7 +9,9 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
 import java.util.BitSet;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -135,7 +137,7 @@ public class ProcessInput {
 		            insertStatement.execute();
 	            }	            
 	            
-	            // populate inventory sets and unions template
+	            // populate structured data with inventory sets
 	            cs = con.prepareCall("{call CreateFullStructData(?)}");
 	            Integer Index = highBit;
 	            cs.setString(1, Index.toString());
@@ -153,6 +155,15 @@ public class ProcessInput {
 	            	insertStatement.setInt(2, bs1.getcapacity());
 		            insertStatement.execute();
 	            }
+	            
+	            // populate structured data with capacities 
+	            System.out.println("that's how long PopulateStructDataWithNumbers took:");
+	            System.out.println(
+	                    new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(new Date()));
+	            cs = con.prepareCall("{call PopulateStructDataWithNumbers}");
+	            cs.executeQuery();	            
+	            System.out.println(
+	                    new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(new Date()));
 	            
 	        } catch (SQLException ex) {
 	            Logger lgr = Logger.getLogger(GenInput.class.getName());
