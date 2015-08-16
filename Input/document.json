@@ -1,0 +1,433 @@
+{
+  "version": 1,
+  "owner": "me",
+  "name": "choices for me",
+  "update": false,
+  "inventorysets": [
+    {
+      "name": "highrollers",
+      "criteria": {
+        "income": [
+          "affluent",
+          "middle"
+        ],
+        "gender": [
+          "M"
+        ],
+        "content": [
+          "business",
+          "sport",
+          "food",
+          "news"
+        ],
+        "age": [
+          "middle"
+        ]
+      },
+      "goal": 150000
+    },
+    {
+      "name": "boyscouts",
+      "criteria": {
+        "gender": [
+          "M"
+        ],
+        "content": [
+          "sport",
+          "games",
+          "outdoor"
+        ],
+        "age": [
+          "young",
+          "child"
+        ]
+      },
+      "goal": 450000
+    },
+    {
+      "name": "Eeasterners",
+      "criteria": {
+        "state": [
+          "NY",
+          "NJ"
+        ],
+        "gender": [
+          "M"
+        ],
+        "age": [
+          "middle",
+          "young"
+        ]
+      },
+      "goal": 150000
+    },
+    {
+      "name": "young women",
+      "criteria": {
+        "income": [
+          "affluent",
+          "middle"
+        ],
+        "gender": [
+          "F"
+        ],
+        "content": [
+          "fashion",
+          "food",
+          "news"
+        ],
+        "age": [
+          "young",
+          "child"
+        ]
+      },
+      "goal": 150000
+    },
+    {
+      "name": "farmers",
+      "criteria": {
+        "state": [
+          "ND",
+          "SD",
+          "NE",
+          "KS"
+        ],
+        "income": [
+          "middle"
+        ],
+        "gender": [
+          "M"
+        ],
+        "content": [
+          "sport"
+        ],
+        "age": [
+          "middle",
+          "young"
+        ]
+      },
+      "goal": 150000
+    },
+    {
+      "name": "boys",
+      "criteria": {
+        "gender": [
+          "M"
+        ],
+        "content": [
+          "games",
+          "sport"
+        ],
+        "age": [
+          "young",
+          "child"
+        ]
+      },
+      "goal": 150000
+    },
+    {
+      "name": "Californians",
+      "criteria": {
+        "state": [
+          "CA"
+        ],
+        "income": [
+          "affluent",
+          "middle"
+        ],
+        "age": [
+          "middle",
+          "young"
+        ]
+      },
+      "goal": 150000
+    },
+    {
+      "name": "gamers",
+      "criteria": {
+        "income": [
+          "affluent",
+          "middle"
+        ],
+        "gender": [
+          "M"
+        ],
+        "content": [
+          "games"
+        ]
+      },
+      "goal": 150000
+    },
+    {
+      "name": "investors",
+      "criteria": {
+        "state": [
+          "NY",
+          "NJ",
+          "CA"
+        ],
+        "income": [
+          "affluent"
+        ],
+        "content": [
+          "business",
+          "news"
+        ],
+        "age": [
+          "middle"
+        ]
+      },
+      "goal": 150000
+    }
+  ],
+  "segments": [
+    {
+      "criteria": {
+        "state": [
+          "CA"
+        ],
+        "income": [
+          "middle"
+        ],
+        "gender": [
+          "F"
+        ],
+        "content": [
+          "fashion",
+          "food"
+        ],
+        "age": [
+          "young"
+        ]
+      },
+      "count": 280000
+    },
+    {
+      "criteria": {
+        "state": [
+          "NY"
+        ],
+        "gender": [
+          "F"
+        ],
+        "age": [
+          "young"
+        ]
+      },
+      "count": 80000
+    },
+    {
+      "criteria": {
+        "state": [
+          "CA"
+        ],
+        "content": [
+          "sport",
+          "food"
+        ],
+        "age": [
+          "young"
+        ]
+      },
+      "count": 250000
+    },
+    {
+      "criteria": {
+        "income": [
+          "affluent"
+        ],
+        "gender": [
+          "M"
+        ],
+        "content": [
+          "business",
+          "news"
+        ],
+        "age": [
+          "middle"
+        ]
+      },
+      "count": 40000
+    },
+    {
+      "criteria": {
+        "state": [
+          "ND"
+        ],
+        "income": [
+          "middle"
+        ],
+        "gender": [
+          "M"
+        ],
+        "content": [
+          "sport",
+          "food"
+        ],
+        "age": [
+          "young"
+        ]
+      },
+      "count": 600000
+    },
+    {
+      "criteria": {
+        "state": [
+          "NJ"
+        ],
+        "income": [
+          "affluent"
+        ],
+        "gender": [
+          "M"
+        ],
+        "content": [
+          "news",
+          "business"
+        ],
+        "age": [
+          "middle"
+        ]
+      },
+      "count": 80000
+    },
+    {
+      "criteria": {
+        "state": [
+          "NY"
+        ],
+        "income": [
+          "affluent"
+        ],
+        "gender": [
+          "M"
+        ],
+        "content": [
+          "news",
+          "business"
+        ],
+        "age": [
+          "middle"
+        ]
+      },
+      "count": 180000
+    },
+    {
+      "criteria": {
+        "state": [
+          "CA"
+        ],
+        "income": [
+          "affluent"
+        ],
+        "gender": [
+          "M"
+        ],
+        "content": [
+          "news",
+          "business"
+        ],
+        "age": [
+          "middle"
+        ]
+      },
+      "count": 200000
+    },
+    {
+      "criteria": {
+        "gender": [
+          "F"
+        ],
+        "content": [
+          "food"
+        ],
+        "age": [
+          "young"
+        ]
+      },
+      "count": 80000
+    },
+    {
+      "criteria": {
+        "state": [
+          "KS"
+        ],
+        "income": [
+          "middle"
+        ],
+        "gender": [
+          "M"
+        ],
+        "content": [
+          "sport",
+          "food"
+        ],
+        "age": [
+          "middle"
+        ]
+      },
+      "count": 220000
+    },
+    {
+      "criteria": {
+        "income": [
+          "middle"
+        ],
+        "gender": [
+          "F"
+        ]
+      },
+      "count": 330000
+    },
+    {
+      "criteria": {
+        "state": [
+          "NJ"
+        ],
+        "gender": [
+          "F"
+        ],
+        "content": [
+          "food"
+        ]
+      },
+      "count": 190000
+    },
+    {
+      "criteria": {
+        "income": [
+          "middle"
+        ],
+        "gender": [
+          "F"
+        ],
+        "age": [
+          "young"
+        ]
+      },
+      "count": 280000
+    },
+    {
+      "criteria": {
+        "state": [
+          "WA"
+        ],
+        "income": [
+          "middle"
+        ],
+        "gender": [
+          "F"
+        ],
+        "content": [
+          "sport",
+          "news"
+        ]
+      },
+      "count": 440000
+    },
+    {
+      "criteria": {},
+      "count": 1550000
+    }
+  ]
+}
