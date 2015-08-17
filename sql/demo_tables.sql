@@ -77,14 +77,12 @@ DROP PROCEDURE IF EXISTS AddUnionsToStructData;
 DELIMITER //
 CREATE PROCEDURE AddUnionsToStructData()
 BEGIN
-	UPDATE FullStructData fsd 
-	LEFT OUTER JOIN structured_data sd ON fsd.set_key = sd.set_key 
-	-- SET fsd.capacity = REPLACE (fsd.capacity, NULL, sd.capacity)
-	SET 
-	 fsd.set_name = sd.set_name,
-	 fsd.capacity = sd.capacity,
-	 fsd.availability = sd.availability,
-	 fsd.goal = sd.goal
+	INSERT IGNORE INTO structured_data
+	SELECT fsd.set_key, null, 0, 0, 0
+	FROM structured_data sd 
+	JOIN FullStructData fsd 
+	ON (fsd.set_key & sd.set_key 
+	AND fsd.set_key >= sd.set_key)
 	;
 END //
 DELIMITER ;

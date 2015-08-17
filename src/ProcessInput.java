@@ -28,7 +28,7 @@ public class ProcessInput {
 		byte[] jsonData = null;
 		String test;
 		try {
-			jsonData = Files.readAllBytes(Paths.get("C:/Users/ypolyako/Downloads/Inventory (3).json"));
+			jsonData = Files.readAllBytes(Paths.get("C:/Users/Yury/Documents/GitHub/TestModel/Input/document.json"));
 			test = new String(jsonData);
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
@@ -125,7 +125,6 @@ public class ProcessInput {
 	            st = con.createStatement();
 	            st.executeUpdate("DELETE FROM raw_inventory"); 
 	            st.executeUpdate("DELETE FROM structured_data"); 
-	            st.executeUpdate("DELETE FROM basestructdata"); 
 	            
 	            // populate structured data with inventory sets
 	            insertStatement = con.prepareStatement
