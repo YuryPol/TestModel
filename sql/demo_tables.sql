@@ -98,11 +98,13 @@ BEGIN
 	SUM(availability), 
 	goal
  FROM (
-	SELECT fsd.set_key, fsd.set_name, ri.count as capacity, ri.count as availability, fsd.goal
-	FROM FullStructData fsd 
+	SELECT sd.set_key, sd.set_name, ri.count as capacity, ri.count as availability, sd.goal
+	FROM structured_data sd 
 	JOIN raw_inventory ri 
-	ON fsd.set_key & ri.basesets != 0 ) blownUp
+	ON sd.set_key & ri.basesets != 0 ) blownUp
+ -- where set_key > 200
  GROUP BY set_key, set_name
+ limit 50
  ;
 END //
 DELIMITER ;

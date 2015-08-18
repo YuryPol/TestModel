@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.nio.file.NoSuchFileException;
  
 
 public class ProcessInput {
@@ -30,6 +31,15 @@ public class ProcessInput {
 		try {
 			jsonData = Files.readAllBytes(Paths.get("C:/Users/Yury/Documents/GitHub/TestModel/Input/document.json"));
 			test = new String(jsonData);
+		} catch (NoSuchFileException e0) {
+			try {
+				jsonData = Files.readAllBytes(Paths.get("C:/Users/ypolyako/workspace/TestModel/Input/document.json"));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return;
+			}
+			test = new String(jsonData);			
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
