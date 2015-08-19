@@ -154,6 +154,7 @@ public class ProcessInputInc {
 	            
 	            System.out.println(
 	                    new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(new Date()));
+	            System.out.println("Finished");
 
 	        } catch (SQLException ex) {
 	            Logger lgr = Logger.getLogger(GenInput.class.getName());
