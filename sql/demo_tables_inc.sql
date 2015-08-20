@@ -103,6 +103,39 @@ BEGIN
 END //
 DELIMITER ;
 
+-- finds for fully included sets
+CREATE TEMPORARY TABLE fully_included_sets
+SELECT 
+	s1.set_key as set_key_new, s2.set_key as set_key_old       
+	FROM structured_data_inc s1 
+	INNER JOIN structured_data_inc s2
+	ON s1.set_key & s2.set_key = s2.set_key AND s1.set_key > s2.set_key AND s1.availability = s2.availability
+;
+-- substitutes structured_data_inc key in structured_data_base for fully included sets
+UPDATE structured_data_base sb, fully_included_sets fi
+SET sb.set_key = fi.set_key_old
+WHERE sb.set_key = fi.set_key_new
+;
+-- deletes fully included sets
+DELETE FROM structured_data_inc si
+USING fully_included_sets fi
+WHERE si.set_key = fi.set_key_old
+;
+DROP TABLE fully_included_sets
+;
+
+-- vew fully included sets
+SELECT     
+	lpad(bin(s1.set_key), 10, '0') as setkey1,
+	s1.set_name as name1,
+    s1.availability as a1, 
+	lpad(bin(s2.set_key), 10, '0') as setkey2,
+	s2.set_name as name2,
+    s2.availability as a2
+FROM structured_data_inc s1
+INNER JOIN structured_data_inc s2
+ON s1.set_key & s2.set_key = s2.set_key AND s1.set_key > s2.set_key AND s1.availability = s2.availability
+;
 --
 -- view data
 --
