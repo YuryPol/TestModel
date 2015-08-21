@@ -103,20 +103,26 @@ BEGIN
 END //
 DELIMITER ;
 
--- finds for fully included sets
-CREATE TEMPORARY TABLE fully_included_sets
-SELECT 
-	s1.set_key as set_key_new, s2.set_key as set_key_old       
-	FROM structured_data_inc s1 
-	INNER JOIN structured_data_inc s2
-	ON s1.set_key & s2.set_key = s2.set_key AND s1.set_key > s2.set_key AND s1.availability = s2.availability
+-- finds fully inclusing sets
+DROP TABLE fully_included_sets;
+CREATE TEMPORARY TABLE fully_included_sets AS
+SELECT BIT_OR(set_key_new), set_key_old
+FROM (
+	SELECT 
+		s1.set_key as set_key_new, s2.set_key as set_key_old, s1.availability      
+		FROM structured_data_inc s1 
+		INNER JOIN structured_data_inc s2
+		ON s1.set_key & s2.set_key = s2.set_key AND s1.set_key > s2.set_key AND s1.availability = s2.availability
+	) tmp
+-- group matching fully inclusing sets into new union of higher rank
+GROUP BY set_key_old
 ;
--- substitutes structured_data_inc key in structured_data_base for fully included sets
+-- substitutes key in structured_data_base for fully inclusing sets with union's key
 UPDATE structured_data_base sb, fully_included_sets fi
 SET sb.set_key = fi.set_key_old
 WHERE sb.set_key = fi.set_key_new
 ;
--- deletes fully included sets
+-- deletes fully inclusing sets' records
 DELETE FROM structured_data_inc si
 USING fully_included_sets fi
 WHERE si.set_key = fi.set_key_old
@@ -124,12 +130,12 @@ WHERE si.set_key = fi.set_key_old
 DROP TABLE fully_included_sets
 ;
 
--- vew fully included sets
+-- vew fully inclusing sets
 SELECT     
-	lpad(bin(s1.set_key), 10, '0') as setkey1,
+	lpad(bin(s1.set_key), 10, '0') as set_key_new,
 	s1.set_name as name1,
     s1.availability as a1, 
-	lpad(bin(s2.set_key), 10, '0') as setkey2,
+	lpad(bin(s2.set_key), 10, '0') as set_key_old,
 	s2.set_name as name2,
     s2.availability as a2
 FROM structured_data_inc s1
