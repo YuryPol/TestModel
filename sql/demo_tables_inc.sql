@@ -44,7 +44,6 @@ CREATE TABLE structured_data_base AS
 	, set_name, capacity, availability, goal, set_key -- effective key
 	FROM structured_data_inc;
 
-
 -- setting up stored procs
 
 -- adds capacities, availabilities
@@ -106,7 +105,7 @@ DELIMITER ;
 -- finds fully inclusing sets
 DROP TABLE fully_included_sets;
 CREATE TEMPORARY TABLE fully_included_sets AS
-SELECT BIT_OR(set_key_new), set_key_old
+SELECT BIT_OR(set_key_new) as set_key_new, set_key_old
 FROM (
 	SELECT 
 		s1.set_key as set_key_new, s2.set_key as set_key_old, s1.availability      
@@ -119,13 +118,13 @@ GROUP BY set_key_old
 ;
 -- substitutes key in structured_data_base for fully inclusing sets with union's key
 UPDATE structured_data_base sb, fully_included_sets fi
-SET sb.set_key = fi.set_key_old
-WHERE sb.set_key = fi.set_key_new
+SET sb.set_key = fi.set_key_new
+WHERE sb.set_key = fi.set_key_old
 ;
 -- deletes fully inclusing sets' records
-DELETE FROM structured_data_inc si
-USING fully_included_sets fi
-WHERE si.set_key = fi.set_key_old
+DELETE FROM structured_data_inc
+USING structured_data_inc INNER JOIN fully_included_sets
+WHERE structured_data_inc.set_key = fully_included_sets.set_key_old
 ;
 DROP TABLE fully_included_sets
 ;
@@ -147,5 +146,7 @@ ON s1.set_key & s2.set_key = s2.set_key AND s1.set_key > s2.set_key AND s1.avail
 --
 select lpad(bin(set_key), 10, '0') as setkey, set_name, rank, capacity, availability, goal from structured_data_inc;
 	
+select lpad(bin(set_key_is), 10, '0') as setkey_is, lpad(bin(set_key), 10, '0') as setkey, set_name, capacity, availability, goal from structured_data_base;
+
 select lpad(bin(basesets), 10, '0') as setkey, count from raw_inventory;	
 
