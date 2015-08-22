@@ -1,7 +1,6 @@
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -17,20 +16,25 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.nio.file.NoSuchFileException;
- 
 
-public class ProcessInput {
-	
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+/**
+ * @author Yury
+ *
+ */
+public class ProcessInputInc {
+
 	static int BITMAP_SIZE = 64;
 
 	public static void main(String[] args) 
 	{
+        System.out.println(
+                new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(new Date()));
 		byte[] jsonData = null;
 		String test;
 		try {
 			jsonData = Files.readAllBytes(Paths.get("C:/Users/Yury/Documents/GitHub/TestModel/Input/document.json"));
-			test = new String(jsonData);
 		} catch (NoSuchFileException e0) {
 			try {
 				jsonData = Files.readAllBytes(Paths.get("C:/Users/ypolyako/workspace/TestModel/Input/document.json"));
@@ -39,7 +43,6 @@ public class ProcessInput {
 				e.printStackTrace();
 				return;
 			}
-			test = new String(jsonData);			
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -79,18 +82,6 @@ public class ProcessInput {
 				System.out.println("no data in inventory sets");
 				return;
 			}			
-			// account for inclusion 
-			for (BaseSet bs : base_sets.values())
-			{
-				for (BaseSet bs1 : base_sets.values())
-				{					
-					if (bs.contains(bs1.getCriteria()))
-					{
-						bs.getkey().or(bs1.getkey());
-					}
-				}
-			}			
-			System.out.println(base_sets.toString());
 			
 			// Create segments' raw data. TODO: write into DB from the start
 			HashMap<BitSet, BaseSegement> base_segments = new HashMap<BitSet, BaseSegement>();
@@ -129,32 +120,28 @@ public class ProcessInput {
 	        String password = "IraAnna12";
 			
 	        try {
+	            System.out.println(
+	                    new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(new Date()));
+	            
 	            con = DriverManager.getConnection(url, user, password);
 	            
 	            // clear everything
 	            st = con.createStatement();
 	            st.executeUpdate("DELETE FROM raw_inventory"); 
-	            st.executeUpdate("DELETE FROM structured_data"); 
+	            st.executeUpdate("DELETE FROM structured_data_inc"); 
 	            
 	            // populate structured data with inventory sets
 	            insertStatement = con.prepareStatement
-	            		("INSERT IGNORE INTO structured_data SET set_key = ?, set_name = ?");
+	            		("INSERT IGNORE INTO structured_data_inc SET set_key = ?, set_name = ?");
 	            for (BaseSet bs1 : base_sets.values()) {
 	            	// insertStatement.setBytes(1, bs1.getKeyVarBin());
 	            	insertStatement.setLong(1, bs1.getKeyBin()[0]);
 		            insertStatement.setString(2, bs1.getname());
 		            insertStatement.execute();
-	            }	            
+	            }
 	            
-	            // create domain Skeleton 
-	            cs = con.prepareCall("{call CreateFullStructData(?)}");
-	            Integer Index = highBit;
-	            cs.setString(1, Index.toString());
-	            cs.executeQuery();
-
-	            // add unions to structured data
-	            cs = con.prepareCall("{call AddUnionsToStructData}");
-	            cs.executeQuery();
+	            System.out.println(
+	                    new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(new Date()));
 	            
 	            // populate raw data with inventory sets' bitmaps
 	            insertStatement = con.prepareStatement
@@ -165,15 +152,10 @@ public class ProcessInput {
 		            insertStatement.execute();
 	            }
 	            
-	            // populate structured data with capacities 
-	            System.out.println("that's how long PopulateStructDataWithNumbers took:");
 	            System.out.println(
 	                    new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(new Date()));
-	            cs = con.prepareCall("{call PopulateStructDataWithNumbers}");
-	            cs.executeQuery();	            
-	            System.out.println(
-	                    new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(new Date()));
-	            
+	            System.out.println("Finished");
+
 	        } catch (SQLException ex) {
 	            Logger lgr = Logger.getLogger(GenInput.class.getName());
 	            lgr.log(Level.SEVERE, ex.getMessage(), ex);
@@ -200,4 +182,3 @@ public class ProcessInput {
 		}
 	}
 }
-	

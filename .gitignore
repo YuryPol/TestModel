@@ -31,3 +31,6 @@ scripts/.metadata/
 # misc build artifacts #
 target/
 
+*.classpath
+*.classpath
+.classpath
