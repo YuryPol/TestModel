@@ -18,7 +18,7 @@ USE Demo;
 -- setting up the tables
 
 -- create raw_inventory table to fill up by impressons' counts
-DROP TABLE raw_inventory;
+DROP TABLE IF EXISTS raw_inventory;
 CREATE TABLE raw_inventory(
 	basesets BIGINT NOT NULL, 
 	count INT NOT NULL,
@@ -26,7 +26,7 @@ CREATE TABLE raw_inventory(
 -- populated by ProcessInputInc.java
 
 -- create structured data 
-DROP TABLE structured_data_inc;
+DROP TABLE IF EXISTS structured_data_inc;
 CREATE TABLE structured_data_inc(
     set_key BIGINT DEFAULT NULL,
 	set_name VARCHAR(20) DEFAULT NULL,
@@ -37,12 +37,16 @@ CREATE TABLE structured_data_inc(
 	PRIMARY KEY(set_key));
 -- initially populated by ProcessInputInc.java with 0-rank records
 
--- create inventroy sets
-DROP TABLE structured_data_base;
+-- create inventroy sets after executing ProcessInputInc.java
+DROP TABLE IF EXISTS structured_data_base;
 CREATE TABLE structured_data_base AS 
 	SELECT set_key as set_key_is -- inventory set's key
 	, set_name, capacity, availability, goal, set_key -- effective key
 	FROM structured_data_inc;
+
+-- get rid from 0 availability nodes in structured data but keep them in the base
+DELETE FROM structured_data_inc
+where availability = 0;
 
 -- setting up stored procs
 
@@ -84,9 +88,6 @@ END //
 DELIMITER ;
 -- needs PopulateWithNumbers call to complete
 
-DELETE FROM t1, t2 USING t1 INNER JOIN t2 INNER JOIN t3
-WHERE t1.id=t2.id AND t2.id=t3.id;
-
 -- deletes non-overlapping unions
 DROP PROCEDURE IF EXISTS EliminateUnions;
 DELIMITER //
@@ -98,12 +99,17 @@ BEGIN
 	AND structured_data_inc.set_key & sb2.set_key = sb2.set_key AND structured_data_inc.set_key > sb2.set_key
 	AND sb1.set_key != sb2.set_key
 	AND structured_data_inc.availability = sb1.availability + sb2.availability)
+	OR structred_data_inc.availability = 0
 ;
 END //
 DELIMITER ;
 
+DROP PROCEDURE IF EXISTS CompactStructData;
+DELIMITER //
+CREATE PROCEDURE CompactStructData()
+BEGIN
 -- finds fully inclusing sets
-DROP TABLE fully_included_sets;
+DROP TABLE IF EXISTS fully_included_sets;
 CREATE TEMPORARY TABLE fully_included_sets AS
 SELECT BIT_OR(set_key_new) as set_key_new, set_key_old
 FROM (
@@ -128,6 +134,8 @@ WHERE structured_data_inc.set_key = fully_included_sets.set_key_old
 ;
 DROP TABLE fully_included_sets
 ;
+END //
+DELIMITER ;
 
 -- vew fully inclusing sets
 SELECT     

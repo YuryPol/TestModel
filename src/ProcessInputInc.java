@@ -32,7 +32,6 @@ public class ProcessInputInc {
         System.out.println(
                 new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(new Date()));
 		byte[] jsonData = null;
-		String test;
 		try {
 			jsonData = Files.readAllBytes(Paths.get("C:/Users/Yury/Documents/GitHub/TestModel/Input/document.json"));
 		} catch (NoSuchFileException e0) {
