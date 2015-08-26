@@ -4,12 +4,18 @@
 -- to start om cmd prompt:
 -- 	java -cp "C:/Program Files (x86)/MySQL/MySQL Connector J/mysql-connector-java-5.1.36-bin.jar";C:/Users/ypolyako/workspace/TestModel/bin ProcessInputInc
 -- 		that creates initial structured and raw data tables from JSON file
--- call PopulateWithNumbers; that adds capacities and availabilities to structured_data_inc
--- create structured_data_base table from structured_data_inc
--- call AdUnions; creates unions of first rank
--- call PopulateWithNumbers; adds capacities and availabilities to structured_data_inc
--- call EliminateUnions; deleats non-overlapping unions creatd by AdUnions
----------------------
+/* 
+   call PopulateWithNumbers; -- that adds capacities and availabilities to structured_data_inc
+   DROP TABLE IF EXISTS structured_data_base;
+   CREATE TABLE structured_data_base AS 
+		SELECT set_key as set_key_is -- inventory set's key
+		, set_name, capacity, availability, goal, set_key -- effective key
+		FROM structured_data_inc;
+   call AddUnions; -- creates unions of first rank
+   call PopulateWithNumbers; -- adds capacities and availabilities to structured_data_inc
+   call EliminateUnions; -- deleats non-overlapping unions creatd by AdUnions
+   call CompactStructData;
+*/
 
 CREATE DATABASE Demo;
 
@@ -37,16 +43,12 @@ CREATE TABLE structured_data_inc(
 	PRIMARY KEY(set_key));
 -- initially populated by ProcessInputInc.java with 0-rank records
 
--- create inventroy sets after executing ProcessInputInc.java
+-- create inventroy sets after executing ProcessInputInc.java and call PopulateWithNumbers;
 DROP TABLE IF EXISTS structured_data_base;
 CREATE TABLE structured_data_base AS 
 	SELECT set_key as set_key_is -- inventory set's key
 	, set_name, capacity, availability, goal, set_key -- effective key
 	FROM structured_data_inc;
-
--- get rid from 0 availability nodes in structured data but keep them in the base
-DELETE FROM structured_data_inc
-where availability = 0;
 
 -- setting up stored procs
 
@@ -74,7 +76,7 @@ BEGIN
 END //
 DELIMITER ;
 
--- adds unions of a higher rank 
+-- adds unions of a higher rank for all nodes
 DROP PROCEDURE IF EXISTS AddUnions;
 DELIMITER //
 CREATE PROCEDURE AddUnions()
@@ -88,7 +90,7 @@ END //
 DELIMITER ;
 -- needs PopulateWithNumbers call to complete
 
--- deletes non-overlapping unions
+-- deletes non-overlapping unions and 0 availability nodes
 DROP PROCEDURE IF EXISTS EliminateUnions;
 DELIMITER //
 CREATE PROCEDURE EliminateUnions()
@@ -99,7 +101,7 @@ BEGIN
 	AND structured_data_inc.set_key & sb2.set_key = sb2.set_key AND structured_data_inc.set_key > sb2.set_key
 	AND sb1.set_key != sb2.set_key
 	AND structured_data_inc.availability = sb1.availability + sb2.availability)
-	OR structred_data_inc.availability = 0
+	OR structured_data_inc.availability = 0 -- get rid from 0 availability nodes in structured data but keep them in the base	
 ;
 END //
 DELIMITER ;
@@ -122,6 +124,11 @@ FROM (
 -- group matching fully inclusing sets into new union of higher rank
 GROUP BY set_key_old
 ;
+-- substitutes key in structured_data_inc for fully inclusing sets with union's key
+UPDATE IGNORE structured_data_inc si, fully_included_sets fi
+SET si.set_key = fi.set_key_new
+WHERE si.set_key = fi.set_key_old
+;
 -- substitutes key in structured_data_base for fully inclusing sets with union's key
 UPDATE structured_data_base sb, fully_included_sets fi
 SET sb.set_key = fi.set_key_new
@@ -131,8 +138,6 @@ WHERE sb.set_key = fi.set_key_old
 DELETE FROM structured_data_inc
 USING structured_data_inc INNER JOIN fully_included_sets
 WHERE structured_data_inc.set_key = fully_included_sets.set_key_old
-;
-DROP TABLE fully_included_sets
 ;
 END //
 DELIMITER ;
@@ -152,6 +157,8 @@ ON s1.set_key & s2.set_key = s2.set_key AND s1.set_key > s2.set_key AND s1.avail
 --
 -- view data
 --
+select lpad(bin(set_key_new), 10, '0') as setkey_new, lpad(bin(set_key_old), 10, '0') as setkey_old from fully_included_sets;
+
 select lpad(bin(set_key), 10, '0') as setkey, set_name, rank, capacity, availability, goal from structured_data_inc;
 	
 select lpad(bin(set_key_is), 10, '0') as setkey_is, lpad(bin(set_key), 10, '0') as setkey, set_name, capacity, availability, goal from structured_data_base;
