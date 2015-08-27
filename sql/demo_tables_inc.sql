@@ -16,6 +16,16 @@
    call EliminateUnions; -- deleats non-overlapping unions creatd by AdUnions
    call CompactStructData;
 */
+--
+-- view data
+--
+select lpad(bin(set_key_new), 10, '0') as setkey_new, lpad(bin(set_key_old), 10, '0') as setkey_old from fully_included_sets;
+
+select lpad(bin(set_key), 10, '0') as setkey, set_name, rank, capacity, availability, goal from structured_data_inc;
+	
+select lpad(bin(set_key_is), 10, '0') as setkey_is, lpad(bin(set_key), 10, '0') as setkey, set_name, capacity, availability, goal from structured_data_base;
+
+select lpad(bin(basesets), 10, '0') as setkey, count from raw_inventory;	
 
 CREATE DATABASE Demo;
 
@@ -125,43 +135,32 @@ FROM (
 GROUP BY set_key_old
 ;
 -- substitutes key in structured_data_inc for fully inclusing sets with union's key
-UPDATE IGNORE structured_data_inc si, fully_included_sets fi
+/*
+UPDATE structured_data_inc si, fully_included_sets fi
 SET si.set_key = fi.set_key_new
 WHERE si.set_key = fi.set_key_old
+; -- TODO: this doesn't work.
+*/
+-- deletes fully inclusing sets' records
+DELETE FROM structured_data_inc 
+USING structured_data_inc INNER JOIN fully_included_sets
+WHERE structured_data_inc.set_key=fully_included_sets.set_key_old
 ;
+-- add new unions of higher rank
+INSERT INTO structured_data_inc
+SELECT fully_included_sets.set_key_new, null, 0, 0, 0, 0
+FROM fully_included_sets 
+LEFT OUTER JOIN structured_data_inc 
+ON fully_included_sets.set_key_new = structured_data_inc.set_key
+WHERE structured_data_inc.set_key IS NULL
+;
+call PopulateWithNumbers;
 -- substitutes key in structured_data_base for fully inclusing sets with union's key
 UPDATE structured_data_base sb, fully_included_sets fi
 SET sb.set_key = fi.set_key_new
 WHERE sb.set_key = fi.set_key_old
 ;
--- deletes fully inclusing sets' records
-DELETE FROM structured_data_inc
-USING structured_data_inc INNER JOIN fully_included_sets
-WHERE structured_data_inc.set_key = fully_included_sets.set_key_old
-;
 END //
 DELIMITER ;
 
--- vew fully inclusing sets
-SELECT     
-	lpad(bin(s1.set_key), 10, '0') as set_key_new,
-	s1.set_name as name1,
-    s1.availability as a1, 
-	lpad(bin(s2.set_key), 10, '0') as set_key_old,
-	s2.set_name as name2,
-    s2.availability as a2
-FROM structured_data_inc s1
-INNER JOIN structured_data_inc s2
-ON s1.set_key & s2.set_key = s2.set_key AND s1.set_key > s2.set_key AND s1.availability = s2.availability
-;
---
--- view data
---
-select lpad(bin(set_key_new), 10, '0') as setkey_new, lpad(bin(set_key_old), 10, '0') as setkey_old from fully_included_sets;
-
-select lpad(bin(set_key), 10, '0') as setkey, set_name, rank, capacity, availability, goal from structured_data_inc;
-	
-select lpad(bin(set_key_is), 10, '0') as setkey_is, lpad(bin(set_key), 10, '0') as setkey, set_name, capacity, availability, goal from structured_data_base;
-
-select lpad(bin(basesets), 10, '0') as setkey, count from raw_inventory;	
 
