@@ -83,6 +83,7 @@ public class ProcessInputInc {
 			}			
 			
 			// Create segments' raw data. TODO: write into DB from the start
+			// TODO: test it, produces too few records
 			HashMap<BitSet, BaseSegement> base_segments = new HashMap<BitSet, BaseSegement>();
 			for (segment seg : inventorydata.getSegments())
 			{

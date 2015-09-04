@@ -15,17 +15,19 @@
    call PopulateWithNumbers; -- adds capacities and availabilities to structured_data_inc
    call EliminateUnions; -- deleats non-overlapping unions creatd by AdUnions
    call CompactStructData;
+   
+   call GetItemsFromSD(1, 10);
 */
 --
 -- view data
 --
 select lpad(bin(set_key_new), 10, '0') as setkey_new, lpad(bin(set_key_old), 10, '0') as setkey_old from fully_included_sets;
 
-select lpad(bin(set_key), 10, '0') as setkey, set_name, rank, capacity, availability, goal from structured_data_inc;
+select lpad(bin(set_key), 10, '0') as set_key, set_name, rank, capacity, availability, goal from structured_data_inc;
 	
-select lpad(bin(set_key_is), 10, '0') as setkey_is, lpad(bin(set_key), 10, '0') as setkey, set_name, capacity, availability, goal from structured_data_base;
+select lpad(bin(set_key_is), 10, '0') as set_key_is, lpad(bin(set_key), 10, '0') as set_key, set_name, capacity, availability, goal from structured_data_base;
 
-select lpad(bin(basesets), 10, '0') as setkey, count from raw_inventory;	
+select lpad(bin(basesets), 10, '0') as set_key, count from raw_inventory;	
 
 CREATE DATABASE Demo;
 
@@ -163,4 +165,46 @@ WHERE sb.set_key = fi.set_key_old
 END //
 DELIMITER ;
 
+-- book an amount of items
+DROP FUNCTION IF EXISTS BookItemsFromIS;
+DELIMITER //
+CREATE FUNCTION BookItemsFromIS(iset BIGINT, amount INT)
+RETURNS BOOLEAN
+DETERMINISTIC
+READS SQL DATA
+BEGIN
+    DECLARE cnt INT;   
+    SELECT availability INTO cnt FROM structured_data_base WHERE set_key_is = iset; 
+    IF cnt >= amount AND amount > 0
+    THEN
+     UPDATE structured_data_base 
+	 SET availability=availability-amount, goal=goal+amount 
+	 WHERE set_key_is = iset;
+	 RETURN TRUE;
+	ELSE
+     RETURN FALSE;
+    END IF;
+END //
+DELIMITER ;
+
+-- getting an amount of items from structured data
+DROP PROCEDURE IF EXISTS GetItemsFromSD;
+DELIMITER //
+CREATE PROCEDURE GetItemsFromSD(IN iset BIGINT, IN amount INT)
+BEGIN
+   IF BookItemsFromIS(iset, amount)
+   THEN		
+     UPDATE structured_data_inc 
+	 SET availability=availability-amount WHERE (set_key & iset)>0;
+     DROP TABLE IF EXISTS struct_data_tmp;
+     CREATE TABLE struct_data_tmp SELECT * FROM structured_data_inc;
+     UPDATE structured_data_inc sd 
+	   SET availability = (SELECT min(sdt.availability) FROM struct_data_tmp sdt
+	     WHERE (sd.set_key & sdt.set_key) = sd.set_key AND sd.set_key <= sdt.set_key);
+	 SELECT 'passed';
+   ELSE
+     SELECT 'failed';
+   END IF;
+END //
+DELIMITER ;
 
