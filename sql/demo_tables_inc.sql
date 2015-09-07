@@ -25,7 +25,7 @@ select lpad(bin(set_key_new), 10, '0') as setkey_new, lpad(bin(set_key_old), 10,
 
 select lpad(bin(set_key), 10, '0') as set_key, set_name, rank, capacity, availability, goal from structured_data_inc;
 select set_key_is, lpad(bin(set_key), 10, '0') as set_key, set_name, capacity, availability, goal from structured_data_base;
-call GetItemsFromSD(
+call GetItemsFromSD();
 
 select lpad(bin(basesets), 10, '0') as set_key, count from raw_inventory;	
 
@@ -48,9 +48,9 @@ DROP TABLE IF EXISTS structured_data_inc;
 CREATE TABLE structured_data_inc(
     set_key BIGINT DEFAULT NULL,
 	set_name VARCHAR(20) DEFAULT NULL,
-	rank INT DEFAULT 0,
-    capacity INT NOT NULL DEFAULT 0, 
-    availability INT NOT NULL DEFAULT 0, 
+	rank INT DEFAULT NULL,
+    capacity INT DEFAULT NULL, 
+    availability INT DEFAULT NULL, 
     goal INT DEFAULT 0,
 	PRIMARY KEY(set_key));
 -- initially populated by ProcessInputInc.java with 0-rank records
@@ -78,7 +78,9 @@ BEGIN
    SELECT sd.set_key, ri.count as capacity, ri.count as availability
 	FROM structured_data_inc sd 
 	JOIN raw_inventory ri 
-	ON sd.set_key & ri.basesets != 0 ) blownUp
+	ON sd.set_key & ri.basesets != 0 
+	WHERE sd.capacity is NULL
+	) blownUp
   GROUP BY set_key
  ) comp
  SET sd0.capacity = comp.capacity,
@@ -94,7 +96,7 @@ DELIMITER //
 CREATE PROCEDURE AddUnions()
 BEGIN
 	INSERT IGNORE INTO structured_data_inc
-	SELECT sd1.set_key | sd2.set_key, null, 0, 0, 0, 0
+	SELECT sd1.set_key | sd2.set_key, NULL, NULL, NULL, NULL, 0
 	FROM structured_data_inc sd1 
 	JOIN structured_data_base sd2 
 	;
@@ -149,8 +151,8 @@ USING structured_data_inc INNER JOIN fully_included_sets
 WHERE structured_data_inc.set_key=fully_included_sets.set_key_old
 ;
 -- add new unions of higher rank
-INSERT INTO structured_data_inc
-SELECT fully_included_sets.set_key_new, null, 0, 0, 0, 0
+INSERT IGNORE INTO structured_data_inc
+SELECT fully_included_sets.set_key_new, NULL, NULL, NULL, NULL, 0
 FROM fully_included_sets 
 LEFT OUTER JOIN structured_data_inc 
 ON fully_included_sets.set_key_new = structured_data_inc.set_key
