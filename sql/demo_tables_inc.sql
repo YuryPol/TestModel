@@ -15,6 +15,7 @@
    call PopulateWithNumbers; -- adds capacities and availabilities to structured_data_inc
    call EliminateUnions; -- deleats non-overlapping unions creatd by AdUnions
    call CompactStructData;
+   call CompactStructData; -- called twice to compact new nodes of higher rank
    
    call GetItemsFromSD(1, 10);
 */
@@ -115,7 +116,7 @@ BEGIN
 	AND structured_data_inc.set_key & sb2.set_key = sb2.set_key AND structured_data_inc.set_key > sb2.set_key
 	AND sb1.set_key != sb2.set_key
 	AND structured_data_inc.availability = sb1.availability + sb2.availability)
-	OR structured_data_inc.availability = 0 -- get rid from 0 availability nodes in structured data but keep them in the base	
+	OR structured_data_inc.availability IS NULL -- get rid from 0 availability nodes in structured data but keep them in the base	
 ;
 END //
 DELIMITER ;
@@ -204,6 +205,7 @@ BEGIN
 	   SET availability = (SELECT min(sdt.availability) FROM struct_data_tmp sdt
 	     WHERE (sd.set_key & sdt.set_key) = sd.set_key AND sd.set_key <= sdt.set_key);
 	 call CompactStructData;
+	 call CompactStructData; -- called twice to compact new nodes of higher rank
 	 SELECT 'passed';
    ELSE
      SELECT 'failed';
