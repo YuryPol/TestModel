@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class ProcessInputInc {
 
 	static int BITMAP_SIZE = 64;
+	static boolean DEBUG = false;
 
 	public static void main(String[] args) 
 	{
@@ -87,6 +88,7 @@ public class ProcessInputInc {
 			HashMap<BitSet, BaseSegement> base_segments = new HashMap<BitSet, BaseSegement>();
 			for (segment seg : inventorydata.getSegments())
 			{
+				boolean match_found = false;
 				BaseSegement tmp = new BaseSegement(BITMAP_SIZE);
 				tmp.setCriteria(seg.getcriteria());
 				
@@ -95,18 +97,33 @@ public class ProcessInputInc {
 					if (bs1.getCriteria().matches(tmp.getCriteria()))
 					{
 						tmp.getkey().or(bs1.getkey());
+						match_found = true;
 
-						int old_capacity = 0;
+/*						int old_capacity = 0;
 						if (base_segments.get(tmp.getkey()) != null)
 						{
 							old_capacity = tmp.getcapacity();
 						}
 						tmp.setcapacity(old_capacity + seg.getCount());
-						base_segments.put(tmp.getkey(), tmp);
+*/						
 					}
 				}
+				if (match_found) 
+				{
+					tmp.setcapacity(seg.getCount());
+					base_segments.put(tmp.getkey(), tmp);
+				}
+				if (DEBUG & tmp.getcapacity() == 0)
+				{
+					// TODO: remove later, for debugging only
+					System.out.println("segment criteria: " + tmp.getCriteria().toString());
+				}
 			}			
-			System.out.println(base_segments.values().toArray().toString());
+			if (DEBUG) for (BaseSet bs1 : base_sets.values())
+			{
+				// TODO: remove later, for debugging only
+				System.out.println("BaseSet criteria: " + bs1.getCriteria().toString());				
+			}
 
 			//
 			// Write inventories into DB
@@ -145,7 +162,7 @@ public class ProcessInputInc {
 	            
 	            // populate raw data with inventory sets' bitmaps
 	            insertStatement = con.prepareStatement
-	            		("INSERT IGNORE INTO raw_inventory SET basesets = ?, count = ?");
+	            		("INSERT INTO raw_inventory SET basesets = ?, count = ?");
 	            for (BaseSegement bs1 : base_segments.values()) {
 	            	insertStatement.setLong(1, bs1.getKeyBin()[0]);
 	            	insertStatement.setInt(2, bs1.getcapacity());

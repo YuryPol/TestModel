@@ -40,8 +40,10 @@ USE Demo;
 DROP TABLE IF EXISTS raw_inventory;
 CREATE TABLE raw_inventory(
 	basesets BIGINT NOT NULL, 
-	count INT NOT NULL,
-    PRIMARY KEY (basesets));    
+	count INT NOT NULL
+    -- , PRIMARY KEY (basesets)
+    )
+    ;    
 -- populated by ProcessInputInc.java
 
 -- create structured data 
