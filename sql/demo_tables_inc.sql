@@ -5,6 +5,11 @@
 -- 	java -cp "C:/Program Files (x86)/MySQL/MySQL Connector J/mysql-connector-java-5.1.36-bin.jar";C:/Users/ypolyako/workspace/TestModel/bin ProcessInputInc
 -- 		that creates initial structured and raw data tables from JSON file
 /* 
+   DROP TABLE IF EXISTS raw_inventory;
+   CREATE TABLE raw_inventory AS 
+   SELECT basesets, sum(count) as count
+       FROM raw_inventory_ex
+       GROUP BY basesets;
    call PopulateWithNumbers; -- that adds capacities and availabilities to structured_data_inc
    DROP TABLE IF EXISTS structured_data_base;
    CREATE TABLE structured_data_base AS 
@@ -37,13 +42,19 @@ USE Demo;
 -- setting up the tables
 
 -- create raw_inventory table to fill up by impressons' counts
-DROP TABLE IF EXISTS raw_inventory;
-CREATE TABLE raw_inventory(
+DROP TABLE IF EXISTS raw_inventory_ex;
+CREATE TABLE raw_inventory_ex(
 	basesets BIGINT NOT NULL, 
 	count INT NOT NULL
     -- , PRIMARY KEY (basesets)
     )
-    ;    
+    ;
+
+DROP TABLE raw_inventory;         
+CREATE TABLE raw_inventory AS 
+SELECT basesets, sum(count) as count
+	FROM raw_inventory_ex;
+	GROUP BY basesets;
 -- populated by ProcessInputInc.java
 
 -- create structured data 

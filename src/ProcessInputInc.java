@@ -144,7 +144,7 @@ public class ProcessInputInc {
 	            
 	            // clear everything
 	            st = con.createStatement();
-	            st.executeUpdate("DELETE FROM raw_inventory"); 
+	            st.executeUpdate("DELETE FROM raw_inventory_ex"); 
 	            st.executeUpdate("DELETE FROM structured_data_inc"); 
 	            
 	            // populate structured data with inventory sets
@@ -162,7 +162,7 @@ public class ProcessInputInc {
 	            
 	            // populate raw data with inventory sets' bitmaps
 	            insertStatement = con.prepareStatement
-	            		("INSERT INTO raw_inventory SET basesets = ?, count = ?");
+	            		("INSERT INTO raw_inventory_ex SET basesets = ?, count = ?");
 	            for (BaseSegement bs1 : base_segments.values()) {
 	            	insertStatement.setLong(1, bs1.getKeyBin()[0]);
 	            	insertStatement.setInt(2, bs1.getcapacity());
