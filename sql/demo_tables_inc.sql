@@ -53,7 +53,7 @@ CREATE TABLE raw_inventory_ex(
 DROP TABLE raw_inventory;         
 CREATE TABLE raw_inventory AS 
 SELECT basesets, sum(count) as count
-	FROM raw_inventory_ex;
+	FROM raw_inventory_ex
 	GROUP BY basesets;
 -- populated by ProcessInputInc.java
 
@@ -219,10 +219,30 @@ BEGIN
 	     WHERE (sd.set_key & sdt.set_key) = sd.set_key AND sd.set_key <= sdt.set_key);
 	 call CompactStructData;
 	 call CompactStructData; -- called twice to compact new nodes of higher rank
+     -- updated inventory sets' table 
+     UPDATE structured_data_base sb, structured_data_inc si
+     SET sb.capacity = si.capacity,
+         sb.availability = si.availability
+     WHERE sb.set_key = si.set_key;     
 	 SELECT 'passed';
    ELSE
      SELECT 'failed';
    END IF;
 END //
 DELIMITER ;
+
+-- testing aids
+DROP PROCEDURE IF EXISTS TestGetItemsFromSD;
+DELIMITER //
+CREATE PROCEDURE TestGetItemsFromSD(IN iset BIGINT, IN amount INT)
+BEGIN
+   IF BookItemsFromIS(iset, amount)
+   THEN     
+     SELECT 'passed';
+   ELSE
+     SELECT 'failed';
+   END IF;
+END //
+DELIMITER ;
+
 
