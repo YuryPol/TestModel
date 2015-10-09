@@ -1,9 +1,8 @@
 /* 
+  Creates needed tables and stored procs
+  
   the process:
-  to start om cmd prompt:
-  java -cp "C:/Program Files (x86)/MySQL/MySQL Connector J/mysql-connector-java-5.1.36-bin.jar";C:/Users/ypolyako/workspace/TestModel/bin ProcessInputInc
-      that creates initial structured and raw data tables from JSON file
-  then run sql script
+  to start om cmd prompt run sql script
   "C:\Program Files\MySQL\MySQL Server 5.6\bin\mysql.exe" "--defaults-file=C:\ProgramData\MySQL\MySQL Server 5.6\my.ini" "--verbose" "-uroot" "-pIraAnna12" < "C:\Users\ypolyako\workspace\TestModel\sql\InitDemo.sql"
  */
  
@@ -11,7 +10,9 @@ CREATE DATABASE IF NOT EXISTS Demo;
 
 USE Demo;
 
+--
 -- setting up the tables
+--
 
 -- create raw_inventory_ex table to fill up by impressons' counts
 DROP TABLE IF EXISTS raw_inventory_ex;
@@ -22,7 +23,7 @@ CREATE TABLE raw_inventory_ex(
     )
     ;
 
--- create structured data 
+-- create structured data table
 DROP TABLE IF EXISTS structured_data_inc;
 CREATE TABLE structured_data_inc(
     set_key BIGINT DEFAULT NULL,
@@ -32,16 +33,19 @@ CREATE TABLE structured_data_inc(
     availability INT DEFAULT NULL, 
     goal INT DEFAULT 0,
     PRIMARY KEY(set_key));
--- initially populated by ProcessInputInc.java with 0-rank records
+-- it will be initially populated by ProcessInputInc.java with 0-rank records
 
--- create inventroy sets after executing ProcessInputInc.java and call PopulateWithNumbers;
+-- create inventroy sets tabel
 DROP TABLE IF EXISTS structured_data_base;
 CREATE TABLE structured_data_base AS 
     SELECT set_key as set_key_is -- inventory set's key
     , set_name, capacity, availability, goal, set_key -- effective key
     FROM structured_data_inc;
+--  it will be populated after executing ProcessInputInc.java and call PopulateWithNumbers;
 
+--
 -- setting up stored procs
+--
 
 -- adds capacities, availabilities
 DROP PROCEDURE IF EXISTS PopulateWithNumbers;
@@ -117,6 +121,7 @@ FROM (
 -- group matching fully inclusing sets into new union of higher rank
 GROUP BY set_key_old
 ;
+
 -- substitutes key in structured_data_inc for fully inclusing sets with union's key
 /*
 UPDATE structured_data_inc si, fully_included_sets fi
@@ -124,6 +129,7 @@ SET si.set_key = fi.set_key_new
 WHERE si.set_key = fi.set_key_old
 ; -- TODO: this doesn't work.
 */
+
 -- deletes fully inclusing sets' records
 DELETE FROM structured_data_inc 
 USING structured_data_inc INNER JOIN fully_included_sets
@@ -141,7 +147,7 @@ call PopulateWithNumbers;
 -- substitutes key in structured_data_base for fully inclusing sets with union's key
 UPDATE structured_data_base sb, fully_included_sets fi
 SET sb.set_key = fi.set_key_new
-  , sb.availability = (SELECTsi.availability FROM structured_data_inc si
+  , sb.availability = (SELECT si.availability FROM structured_data_inc si
                        WHERE si.set_key = fi.set_key_new)
 WHERE sb.set_key = fi.set_key_old
 ;

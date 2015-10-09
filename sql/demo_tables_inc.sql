@@ -176,7 +176,7 @@ call PopulateWithNumbers;
 -- substitutes key in structured_data_base for fully inclusing sets with union's key
 UPDATE structured_data_base sb, fully_included_sets fi
 SET sb.set_key = fi.set_key_new
-  , sb.availability = (SELECTsi.availability FROM structured_data_inc si
+  , sb.availability = (SELECT si.availability FROM structured_data_inc si
                        WHERE si.set_key = fi.set_key_new)
 WHERE sb.set_key = fi.set_key_old
 ;

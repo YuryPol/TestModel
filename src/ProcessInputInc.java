@@ -21,7 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author Yury
- *
+ * processes JSON input
  */
 public class ProcessInputInc {
 
