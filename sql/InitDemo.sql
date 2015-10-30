@@ -121,7 +121,6 @@ FROM (
 -- group matching fully inclusing sets into new union of higher rank
 GROUP BY set_key_old
 ;
-
 -- substitutes key in structured_data_inc for fully inclusing sets with union's key
 /*
 UPDATE structured_data_inc si, fully_included_sets fi
@@ -129,7 +128,6 @@ SET si.set_key = fi.set_key_new
 WHERE si.set_key = fi.set_key_old
 ; -- TODO: this doesn't work.
 */
-
 -- deletes fully inclusing sets' records
 DELETE FROM structured_data_inc 
 USING structured_data_inc INNER JOIN fully_included_sets
@@ -199,16 +197,39 @@ BEGIN
 END //
 DELIMITER ;
 
+--
 -- testing aids
+--
 DROP PROCEDURE IF EXISTS TestGetItemsFromSD;
+-- we shouldn't do it as it modifies the data
+--DELIMITER //
+--CREATE PROCEDURE TestGetItemsFromSD(IN iset BIGINT, IN amount INT)
+--BEGIN
+--   IF BookItemsFromIS(iset, amount)
+--   THEN     
+--     SELECT 'passed';
+--   ELSE
+--     SELECT 'failed';
+--   END IF;
+--END //
+--DELIMITER ;
+
+DROP PROCEDURE IF EXISTS GetTotalAvailability;
 DELIMITER //
-CREATE PROCEDURE TestGetItemsFromSD(IN iset BIGINT, IN amount INT)
+CREATE PROCEDURE GetTotalAvailability()
 BEGIN
-   IF BookItemsFromIS(iset, amount)
-   THEN     
-     SELECT 'passed';
-   ELSE
-     SELECT 'failed';
-   END IF;
+  SELECT 
+    SUM(count) as total_capacity
+  FROM raw_inventory; 
+END //
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS GetTotalGoals;
+DELIMITER //
+CREATE PROCEDURE GetTotalGoals()
+BEGIN
+  SELECT 
+    SUM(goal) as total_goals
+  FROM structured_data_base; 
 END //
 DELIMITER ;
