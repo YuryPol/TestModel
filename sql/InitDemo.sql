@@ -200,19 +200,6 @@ DELIMITER ;
 --
 -- testing aids
 --
-DROP PROCEDURE IF EXISTS TestGetItemsFromSD;
--- we shouldn't do it as it modifies the data
---DELIMITER //
---CREATE PROCEDURE TestGetItemsFromSD(IN iset BIGINT, IN amount INT)
---BEGIN
---   IF BookItemsFromIS(iset, amount)
---   THEN     
---     SELECT 'passed';
---   ELSE
---     SELECT 'failed';
---   END IF;
---END //
---DELIMITER ;
 
 DROP PROCEDURE IF EXISTS GetTotalAvailability;
 DELIMITER //
