@@ -23,8 +23,8 @@ CREATE TABLE structured_data_base AS
     , set_name, capacity, availability, goal, set_key -- effective key
     FROM structured_data_inc;
     
--- call AddUnions; -- creates unions of first rank
--- call PopulateWithNumbers; -- adds capacities and availabilities to structured_data_inc
+call AddUnions; -- creates unions
+call PopulateWithNumbers; -- adds capacities and availabilities to structured_data_inc
 -- call EliminateUnions; -- deleats non-overlapping unions creatd by AdUnions
 
 call CompactStructData;

@@ -21,7 +21,7 @@ CREATE TABLE raw_inventory_ex(
     count INT NOT NULL
     -- , PRIMARY KEY (basesets)
     )
-    ;
+;
 
 -- create structured data table
 DROP TABLE IF EXISTS structured_data_inc;
@@ -32,7 +32,8 @@ CREATE TABLE structured_data_inc(
     capacity INT DEFAULT NULL, 
     availability INT DEFAULT NULL, 
     goal INT DEFAULT 0,
-    PRIMARY KEY(set_key));
+    PRIMARY KEY(set_key))
+;
 -- it will be initially populated by ProcessInputInc.java with 0-rank records
 
 -- create inventroy sets tabel
@@ -40,7 +41,8 @@ DROP TABLE IF EXISTS structured_data_base;
 CREATE TABLE structured_data_base AS 
     SELECT set_key as set_key_is -- inventory set's key
     , set_name, capacity, availability, goal, set_key -- effective key
-    FROM structured_data_inc;
+    FROM structured_data_inc
+;
 --  it will be populated after executing ProcessInputInc.java and call PopulateWithNumbers;
 
 --
@@ -78,11 +80,18 @@ DROP PROCEDURE IF EXISTS AddUnions;
 DELIMITER //
 CREATE PROCEDURE AddUnions()
 BEGIN
+    DECLARE cnt INT;   
+    DECLARE cnt_updated INT;   
+    SELECT count(*) INTO cnt FROM structured_data_inc; 
     INSERT IGNORE INTO structured_data_inc
-    SELECT sd1.set_key | sd2.set_key, NULL, NULL, NULL, NULL, 0
-    FROM structured_data_inc sd1 
-    JOIN structured_data_base sd2 
-    ;
+    SELECT sd.set_key | ri2.basesets, NULL, NULL, NULL, NULL, 0
+    FROM structured_data_inc sd 
+    JOIN raw_inventory ri 
+    on sd.set_key & ri.basesets != 0;
+    SELECT count(*) INTO cnt_updated FROM structured_data_inc; 
+    IF (cnt < cnt_updated) THEN
+        call AddUnions; -- Continue adding unions of higher ranks
+    END IF;
 END //
 DELIMITER ;
 -- needs PopulateWithNumbers call to complete
