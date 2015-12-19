@@ -9,23 +9,71 @@
  
 USE Demo;
 
+-- create temporary table to insert next rank rows
+DROP /*TEMPORARY*/ TABLE IF EXISTS unions_last_rank;
+CREATE /*TEMPORARY*/ TABLE unions_last_rank(
+    set_key BIGINT DEFAULT NULL,
+    set_name VARCHAR(20) DEFAULT NULL,
+    rank INT DEFAULT NULL,
+    capacity INT DEFAULT NULL, 
+    availability INT DEFAULT NULL, 
+    goal INT DEFAULT 0,
+    PRIMARY KEY(set_key))
+;
+
+DROP /*TEMPORARY*/ TABLE IF EXISTS unions_next_rank;
+CREATE /*TEMPORARY*/ TABLE unions_next_rank(
+    set_key BIGINT DEFAULT NULL,
+    set_name VARCHAR(20) DEFAULT NULL,
+    rank INT DEFAULT NULL,
+    capacity INT DEFAULT NULL, 
+    availability INT DEFAULT NULL, 
+    goal INT DEFAULT 0,
+    PRIMARY KEY(set_key))
+;
+
+DROP /*TEMPORARY*/ TABLE IF EXISTS unions_prev_rank;
+CREATE /*TEMPORARY*/ TABLE unions_prev_rank(
+    set_key BIGINT DEFAULT NULL,
+    set_name VARCHAR(20) DEFAULT NULL,
+    rank INT DEFAULT NULL,
+    capacity INT DEFAULT NULL, 
+    availability INT DEFAULT NULL, 
+    goal INT DEFAULT 0,
+    PRIMARY KEY(set_key))
+;
+
 DROP TABLE IF EXISTS raw_inventory;
 CREATE TABLE raw_inventory AS 
 SELECT basesets, sum(count) as count
    FROM raw_inventory_ex
    GROUP BY basesets; -- adds up multiple records in raw_inventory_ex with the same key
    
-call PopulateWithNumbers; -- that adds capacities and availabilities to structured_data_inc
+call PopulateWithNumbers; -- that adds capacities and availabilities to structured data
 
-DROP TABLE IF EXISTS structured_data_base;
-CREATE TABLE structured_data_base AS 
-    SELECT set_key as set_key_is -- inventory set's key
+-- populate inventory sets table
+INSERT INTO structured_data_base 
+    SELECT set_key  -- inventory set's key
     , set_name, capacity, availability, goal, set_key -- effective key
     FROM structured_data_inc;
     
+-- start union_next_rank table
+INSERT INTO unions_next_rank 
+    SELECT set_key  -- inventory set's key
+    , NULL, NULL, NULL, NULL, 0
+    FROM structured_data_inc;
+
+-- start unions_prev_rank table
+INSERT INTO unions_prev_rank 
+    SELECT BIT_OR(set_key)  -- highest rank union set's key
+    , NULL, NULL, NULL, NULL, 0
+    FROM structured_data_inc;
+
+
+SET max_sp_recursion_depth=255;
 call AddUnions; -- creates unions
-call PopulateWithNumbers; -- adds capacities and availabilities to structured_data_inc
+-- call PopulateWithNumbers; -- adds capacities and availabilities to structured_data_inc
 -- call EliminateUnions; -- deleats non-overlapping unions creatd by AdUnions
 
-call CompactStructData;
+-- call CompactStructData;
 -- call CompactStructData; -- called twice to compact new nodes of higher rank

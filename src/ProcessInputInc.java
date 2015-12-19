@@ -144,8 +144,8 @@ public class ProcessInputInc {
 	            
 	            // clear everything
 	            st = con.createStatement();
-	            st.executeUpdate("DELETE FROM raw_inventory_ex"); 
-	            st.executeUpdate("DELETE FROM structured_data_inc"); 
+	            st.executeUpdate("TRUNCATE raw_inventory_ex"); 
+	            st.executeUpdate("TRUNCATE structured_data_inc"); 
 	            
 	            // populate structured data with inventory sets
 	            insertStatement = con.prepareStatement
