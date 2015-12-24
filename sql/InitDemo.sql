@@ -79,62 +79,101 @@ BEGIN
 END //
 DELIMITER ;
 
+-- adds capacities, availabilities
+DROP PROCEDURE IF EXISTS PopulateRankWithNumbers;
+DELIMITER //
+CREATE PROCEDURE PopulateRankWithNumbers()
+BEGIN
+ UPDATE unions_next_rank nr0,
+ (SELECT 
+    set_key,
+    SUM(capacity) as capacity, 
+    SUM(availability) as availability
+  FROM (    
+   SELECT nr.set_key, ri.count as capacity, ri.count as availability
+    FROM unions_next_rank nr 
+    JOIN raw_inventory ri 
+    ON nr.set_key & ri.basesets != 0 
+    WHERE nr.capacity is NULL
+    ) blownUp
+  GROUP BY set_key
+ ) comp
+ SET nr0.capacity = comp.capacity,
+     nr0.availability = comp.availability
+ WHERE nr0.set_key = comp.set_key
+ ;
+END //
+DELIMITER ;
+
 -- adds unions of higher ranks for all nodes
 DROP PROCEDURE IF EXISTS AddUnions;
 DELIMITER //
 CREATE PROCEDURE AddUnions()
 BEGIN
     DECLARE cnt INT;   
-    DECLARE cnt_updated INT;   
+    DECLARE cnt_updated INT;
+    REPEAT 
     SELECT count(*) INTO cnt FROM structured_data_inc;
-    -- save rank table created in previous itteration and then clear it
+    -- save rank table created in previous itteration
     TRUNCATE unions_last_rank;
     INSERT INTO unions_last_rank
 	   SELECT * FROM unions_next_rank;
 	TRUNCATE unions_next_rank;
 	-- build next rank
-	INSERT IGNORE INTO unions_next_rank
-       SELECT sb.set_key_is | ul.set_key, NULL, NULL, SUM(ri.count) AS capacity, SUM(ri.count) AS availability, 0
-	   FROM unions_last_rank ul
+	INSERT /*IGNORE*/ INTO unions_next_rank
+       SELECT sb.set_key_is | lr.set_key, NULL, NULL, NULL, NULL, 0
+	   FROM unions_last_rank lr
        JOIN structured_data_base sb
 	   JOIN raw_inventory ri
-       ON sb.set_key_is & ri.basesets != 0 AND ul.set_key & ri.basesets != 0
-       GROUP BY sb.set_key_is | ul.set_key;
-    -- delete fully included sets
+           ON  (sb.set_key_is & ri.basesets != 0)
+           AND (lr.set_key & ri.basesets) != 0
+           AND (sb.set_key_is | lr.set_key) != lr.set_key
+       GROUP BY sb.set_key_is | lr.set_key;
+    CALL PopulateRankWithNumbers;
+    -- delete fully included sets of lower rank
     DELETE FROM structured_data_inc
     WHERE EXISTS (
         SELECT *
         FROM unions_next_rank nr
-        WHERE structured_data_inc.set_key & nr.set_key
-        AND structured_data_inc.capacity = nr.capacity);
-
-    
-	-- add temp table to sturctured data
-	INSERT IGNORE INTO structured_data_inc
-	SELECT * FROM unions_next_rank;
+        WHERE (structured_data_inc.set_key & nr.set_key) = structured_data_inc.set_key
+        -- AND structured_data_inc.set_key != nr.set_key
+        AND structured_data_inc.capacity = nr.capacity);    
+    -- add temp table to sturctured data
+    INSERT /*IGNORE*/ INTO structured_data_inc
+    SELECT * FROM unions_next_rank;
      -- Continue adding unions of higher ranks
     SELECT count(*) INTO cnt_updated FROM structured_data_inc; 
-    IF (cnt < cnt_updated) THEN
-        call AddUnions;
-    END IF;
+    UNTIL  (cnt = cnt_updated) 
+    END REPEAT;
+    -- delete empty sets ????
+    DELETE FROM structured_data_inc
+    WHERE capacity IS NULL;
+    
+    
+    -- link from structured_data_base
+    UPDATE structured_data_base, structured_data_inc
+    SET structured_data_base.capacity = structured_data_inc.capacity,
+        structured_data_base.availability = structured_data_inc.availability
+    WHERE structured_data_base.set_key_inc & structured_data_inc.set_key
+    
+    
 END //
 DELIMITER ;
--- needs PopulateWithNumbers call to complete
 
 -- adds unions of lower ranks for all nodes
-DROP PROCEDURE IF EXISTS AddUnions1;
-DELIMITER //
-CREATE PROCEDURE AddUnions1()
-BEGIN
-	SELECT BIT_OR(basesets)
-	FROM (
-        SELECT sb.set_key_is, ri.basesets
-        FROM structured_data_base sb
-        JOIN raw_inventory ri
-        ON (sb.set_key_is & ri.basesets) != 0
-    ) tmp;
-END //
-DELIMITER ;
+--DROP PROCEDURE IF EXISTS AddUnions1;
+--DELIMITER //
+--CREATE PROCEDURE AddUnions1()
+--BEGIN
+--	SELECT BIT_OR(basesets)
+--	FROM (
+--        SELECT sb.set_key_is, ri.basesets
+--        FROM structured_data_base sb
+--        JOIN raw_inventory ri
+--        ON (sb.set_key_is & ri.basesets) != 0
+--    ) tmp;
+--END //
+--DELIMITER ;
 -- needs PopulateWithNumbers call to complete
 
 -- deletes non-overlapping unions and 0 availability nodes
