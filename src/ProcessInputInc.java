@@ -145,15 +145,16 @@ public class ProcessInputInc {
 	            // clear everything
 	            st = con.createStatement();
 	            st.executeUpdate("TRUNCATE raw_inventory_ex"); 
-	            st.executeUpdate("TRUNCATE structured_data_inc"); 
+	            st.executeUpdate("TRUNCATE structured_data_base"); 
 	            
 	            // populate structured data with inventory sets
 	            insertStatement = con.prepareStatement
-	            		("INSERT IGNORE INTO structured_data_inc SET set_key = ?, set_name = ?");
+	            		("INSERT IGNORE INTO structured_data_base SET set_key = ?, set_name = ?, set_key_is = ?");
 	            for (BaseSet bs1 : base_sets.values()) {
 	            	// insertStatement.setBytes(1, bs1.getKeyVarBin());
 	            	insertStatement.setLong(1, bs1.getKeyBin()[0]);
 		            insertStatement.setString(2, bs1.getname());
+	            	insertStatement.setLong(3, bs1.getKeyBin()[0]);
 		            insertStatement.execute();
 	            }
 	            

@@ -28,7 +28,7 @@ DROP TABLE IF EXISTS structured_data_inc;
 CREATE TABLE structured_data_inc(
     set_key BIGINT DEFAULT NULL,
     set_name VARCHAR(20) DEFAULT NULL,
-    rank INT DEFAULT NULL,
+--    rank INT DEFAULT NULL,
     capacity INT DEFAULT NULL, 
     availability INT DEFAULT NULL, 
     goal INT DEFAULT 0,
@@ -40,11 +40,11 @@ CREATE TABLE structured_data_inc(
 DROP TABLE IF EXISTS structured_data_base;
 CREATE TABLE structured_data_base( 
     set_key_is BIGINT DEFAULT NULL,
+    set_key BIGINT DEFAULT NULL,
     set_name VARCHAR(20) DEFAULT NULL,
     capacity INT DEFAULT NULL, 
     availability INT DEFAULT NULL, 
     goal INT DEFAULT 0,
-    set_key BIGINT DEFAULT NULL,
     PRIMARY KEY(set_key_is))
 ;
 --  it will be populated after executing ProcessInputInc.java and call PopulateWithNumbers;
@@ -58,7 +58,7 @@ DROP PROCEDURE IF EXISTS PopulateWithNumbers;
 DELIMITER //
 CREATE PROCEDURE PopulateWithNumbers()
 BEGIN
- UPDATE structured_data_inc sd0,
+ UPDATE structured_data_inc sd,
  (SELECT 
     set_key,
     SUM(capacity) as capacity, 
@@ -72,9 +72,9 @@ BEGIN
     ) blownUp
   GROUP BY set_key
  ) comp
- SET sd0.capacity = comp.capacity,
-     sd0.availability = comp.availability
- WHERE sd0.set_key = comp.set_key
+ SET sd.capacity = comp.capacity,
+     sd.availability = comp.availability
+ WHERE sd.set_key = comp.set_key
  ;
 END //
 DELIMITER ;
@@ -121,7 +121,7 @@ BEGIN
 	TRUNCATE unions_next_rank;
 	-- build next rank
 	INSERT /*IGNORE*/ INTO unions_next_rank
-       SELECT sb.set_key_is | lr.set_key, NULL, NULL, NULL, NULL, 0
+       SELECT sb.set_key_is | lr.set_key, NULL, NULL, NULL, 0
 	   FROM unions_last_rank lr
        JOIN structured_data_base sb
 	   JOIN raw_inventory ri
@@ -145,18 +145,14 @@ BEGIN
     SELECT count(*) INTO cnt_updated FROM structured_data_inc; 
     UNTIL  (cnt = cnt_updated) 
     END REPEAT;
-    -- delete empty sets ????
+    -- delete empty sets ???? Not here.
     DELETE FROM structured_data_inc
-    WHERE capacity IS NULL;
-    
-    
+    WHERE capacity IS NULL;    
     -- link from structured_data_base
     UPDATE structured_data_base, structured_data_inc
-    SET structured_data_base.capacity = structured_data_inc.capacity,
-        structured_data_base.availability = structured_data_inc.availability
-    WHERE structured_data_base.set_key_inc & structured_data_inc.set_key
-    
-    
+    SET structured_data_base.set_key = structured_data_inc.set_key
+    WHERE structured_data_base.set_key_is & structured_data_inc.set_key = structured_data_base.set_key_is
+    AND structured_data_base.capacity = structured_data_inc.capacity;
 END //
 DELIMITER ;
 
@@ -195,48 +191,23 @@ DELIMITER ;
 DROP PROCEDURE IF EXISTS CompactStructData;
 DELIMITER //
 CREATE PROCEDURE CompactStructData()
-BEGIN
--- finds fully inclusing sets
-DROP TABLE IF EXISTS fully_included_sets;
-CREATE TEMPORARY TABLE fully_included_sets AS
-SELECT BIT_OR(set_key_new) as set_key_new, set_key_old
-FROM (
-    SELECT 
-        s1.set_key as set_key_new, s2.set_key as set_key_old, s1.availability      
-        FROM structured_data_inc s1 
-        INNER JOIN structured_data_inc s2
-        ON s1.set_key & s2.set_key = s2.set_key AND s1.set_key > s2.set_key AND s1.availability = s2.availability
-    ) tmp
--- group matching fully inclusing sets into new union of higher rank
-GROUP BY set_key_old
-;
--- substitutes key in structured_data_inc for fully inclusing sets with union's key
-/*
-UPDATE structured_data_inc si, fully_included_sets fi
-SET si.set_key = fi.set_key_new
-WHERE si.set_key = fi.set_key_old
-; -- TODO: this doesn't work.
-*/
--- deletes fully inclusing sets' records
-DELETE FROM structured_data_inc 
-USING structured_data_inc INNER JOIN fully_included_sets
-WHERE structured_data_inc.set_key=fully_included_sets.set_key_old
-;
--- add new unions of higher rank
-INSERT IGNORE INTO structured_data_inc
-SELECT fully_included_sets.set_key_new, NULL, NULL, NULL, NULL, 0
-FROM fully_included_sets 
-LEFT OUTER JOIN structured_data_inc 
-ON fully_included_sets.set_key_new = structured_data_inc.set_key
-WHERE structured_data_inc.set_key IS NULL
-;
--- call PopulateWithNumbers;
--- substitutes key in structured_data_base for fully inclusing sets with union's key
-UPDATE structured_data_base sb, fully_included_sets fi
-SET sb.set_key = fi.set_key_new
-  , sb.availability = (SELECT si.availability FROM structured_data_inc si
-                       WHERE si.set_key = fi.set_key_new)
-WHERE sb.set_key = fi.set_key_old
+BEGIN	
+CREATE TEMPORARY TABLE IF NOT EXISTS struct_data_tmp;
+TRUNCATE struct_data_tmp;
+INSERT INTO struct_data_tmp SELECT * FROM structured_data_inc;
+-- delete nodes of lower rank with the same availability
+DELETE FROM structured_data_inc
+WHERE EXISTS (
+    SELECT *
+    FROM struct_data_tmp sdt
+    WHERE (structured_data_inc.set_key & sdt.set_key) = structured_data_inc.set_key
+    AND structured_data_inc.set_key > sdt.set_key
+    AND structured_data_inc.availability = sdt.availability);    
+-- link from structured_data_base
+UPDATE structured_data_base, structured_data_inc
+    SET structured_data_base.set_key = structured_data_inc.set_key
+    WHERE structured_data_base.set_key_is & structured_data_inc.set_key = structured_data_base.set_key_is
+    AND structured_data_base.availability = structured_data_inc.availability
 ;
 END //
 DELIMITER ;
@@ -270,20 +241,23 @@ CREATE PROCEDURE GetItemsFromSD(IN iset BIGINT, IN amount INT)
 BEGIN
    IF BookItemsFromIS(iset, amount)
    THEN
-     -- update structured data (rule #1)
+     -- update structured data with rule #1
      UPDATE structured_data_inc 
-     SET availability=availability-amount WHERE (set_key & iset)>0;
-     DROP TABLE IF EXISTS struct_data_tmp;
-     CREATE TABLE struct_data_tmp SELECT * FROM structured_data_inc;
-     UPDATE structured_data_inc sd 
-       SET availability = (SELECT min(sdt.availability) FROM struct_data_tmp sdt
-         WHERE (sd.set_key & sdt.set_key) = sd.set_key AND sd.set_key <= sdt.set_key);
-     -- propagate the changes into base table
+        SET availability = availability - amount 
+        WHERE (set_key & iset) = iset;
+     -- update structured data with rule #2
+     CREATE TEMPORARY TABLE IF NOT EXISTS struct_data_tmp;
+     TRUNCATE struct_data_tmp;
+     INSERT INTO struct_data_tmp SELECT * FROM structured_data_inc;
+     UPDATE structured_data_inc sd, struct_data_tmp sdt  
+       SET sd.availability = (SELECT min(sdt.availability) FROM struct_data_tmp sdt
+         WHERE (sd.set_key & sdt.set_key) = sd.set_key AND sd.set_key <= sdt.set_key);       
+         -- propagate the changes into base table
      UPDATE structured_data_base sb, structured_data_inc sd
-     SET sb.availability = LEAST(sb.availability, sd.availability) 
-     WHERE sd.set_key & sb.set_key_is and BIT_COUNT(sd.set_key) >= BIT_COUNT(sb.set_key_is);
+     SET sb.availability = LEAST(sb.availability, sd.availability)
+     WHERE sd.set_key & sb.set_key_is = sb.set_key_is;     
      -- remove unneeded nodes
-     call CompactStructData;
+     -- call CompactStructData;
      -- call CompactStructData; -- called twice to compact new nodes of higher rank
      SELECT 'passed';
    ELSE
