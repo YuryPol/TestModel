@@ -175,7 +175,7 @@ public class ProcessInputInc {
 	            System.out.println("Finished");
 
 	        } catch (SQLException ex) {
-	            Logger lgr = Logger.getLogger(GenInput.class.getName());
+	            Logger lgr = Logger.getLogger(ProcessInputInc.class.getName());
 	            lgr.log(Level.SEVERE, ex.getMessage(), ex);
 
 	        } finally {
@@ -190,7 +190,7 @@ public class ProcessInputInc {
 	                    con.close();
 	                }
 	            } catch (SQLException ex) {
-	                Logger lgr = Logger.getLogger(GenInput.class.getName());
+	                Logger lgr = Logger.getLogger(ProcessInputInc.class.getName());
 	                lgr.log(Level.WARNING, ex.getMessage(), ex);
 	            }
 	        }

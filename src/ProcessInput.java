@@ -175,7 +175,7 @@ public class ProcessInput {
 	                    new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(new Date()));
 	            
 	        } catch (SQLException ex) {
-	            Logger lgr = Logger.getLogger(GenInput.class.getName());
+	            Logger lgr = Logger.getLogger(ProcessInput.class.getName());
 	            lgr.log(Level.SEVERE, ex.getMessage(), ex);
 
 	        } finally {
@@ -190,7 +190,7 @@ public class ProcessInput {
 	                    con.close();
 	                }
 	            } catch (SQLException ex) {
-	                Logger lgr = Logger.getLogger(GenInput.class.getName());
+	                Logger lgr = Logger.getLogger(ProcessInput.class.getName());
 	                lgr.log(Level.WARNING, ex.getMessage(), ex);
 	            }
 	        }
