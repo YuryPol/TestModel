@@ -4,6 +4,7 @@ select set_key_is, lpad(bin(set_key), 10, '0') as set_key, set_name, capacity, a
 select lpad(bin(set_key), 10, '0') as set_key, set_name, capacity, availability, goal from structured_data_inc -- order by capacity
 ;
 call GetItemsFromSD(
+1,10);
 
 select lpad(bin(set_key), 10, '0') as set_key, set_name, capacity, availability, goal from unions_next_rank; -- order by capacity
 

@@ -38,6 +38,11 @@ SELECT basesets, sum(count) as count
    FROM raw_inventory_ex
    GROUP BY basesets; -- adds up multiple records in raw_inventory_ex with the same key
    
+-- update raw inventory with weights
+ALTER TABLE raw_inventory ADD weight BIGINT DEFAULT '0' NOT NULL;
+SELECT @n:=0;
+UPDATE raw_inventory SET weight = @n := @n + raw_inventory.count;
+   
 -- that adds capacities and availabilities to structured data
 UPDATE structured_data_base sdb,
   (SELECT set_key, SUM(ri.count) AS capacity, SUM(ri.count) AS availability

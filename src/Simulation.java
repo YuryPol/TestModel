@@ -27,7 +27,7 @@ public class Simulation {
         PreparedStatement getServedCountStatement = null;
         String url = "jdbc:mysql://localhost:3306/test_fia";
         String user = "root";
-        String password = "password";
+        String password = "IraAnna12";
         
         Random rand= new Random();
         try {

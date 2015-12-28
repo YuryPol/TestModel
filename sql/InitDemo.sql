@@ -157,10 +157,10 @@ END //
 DELIMITER ;
 
 -- adds unions of lower ranks for all nodes
---DROP PROCEDURE IF EXISTS AddUnions1;
---DELIMITER //
---CREATE PROCEDURE AddUnions1()
---BEGIN
+-- DROP PROCEDURE IF EXISTS AddUnions1;
+-- DELIMITER //
+-- CREATE PROCEDURE AddUnions1()
+-- BEGIN
 --	SELECT BIT_OR(basesets)
 --	FROM (
 --        SELECT sb.set_key_is, ri.basesets
@@ -168,8 +168,8 @@ DELIMITER ;
 --        JOIN raw_inventory ri
 --        ON (sb.set_key_is & ri.basesets) != 0
 --    ) tmp;
---END //
---DELIMITER ;
+-- END //
+-- DELIMITER ;
 -- needs PopulateWithNumbers call to complete
 
 -- deletes non-overlapping unions and 0 availability nodes
