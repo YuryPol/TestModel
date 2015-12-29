@@ -25,7 +25,7 @@ public class Simulation {
         PreparedStatement updateResultData = null;
         PreparedStatement updateMissedCalls = null;
         PreparedStatement getServedCountStatement = null;
-        String url = "jdbc:mysql://localhost:3306/test_fia";
+        String url = "jdbc:mysql://localhost:3306/demo";
         String user = "root";
         String password = "IraAnna12";
         

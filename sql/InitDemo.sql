@@ -18,9 +18,8 @@ USE Demo;
 DROP TABLE IF EXISTS raw_inventory_ex;
 CREATE TABLE raw_inventory_ex(
     basesets BIGINT NOT NULL, 
-    count INT NOT NULL
-    -- , PRIMARY KEY (basesets)
-    )
+    count INT NOT NULL,
+    criteria VARCHAR(200) DEFAULT NULL)
 ;
 
 -- create structured data table
@@ -45,6 +44,7 @@ CREATE TABLE structured_data_base(
     capacity INT DEFAULT NULL, 
     availability INT DEFAULT NULL, 
     goal INT DEFAULT 0,
+    criteria VARCHAR(200) DEFAULT NULL,
     PRIMARY KEY(set_key_is))
 ;
 --  it will be populated after executing ProcessInputInc.java and call PopulateWithNumbers;

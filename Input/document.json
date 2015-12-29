@@ -29,13 +29,13 @@
     {
       "name": "boyscouts",
       "criteria": {
-        "gender": [
-          "M"
-        ],
         "content": [
           "sport",
           "games",
           "outdoor"
+        ],
+        "gender": [
+          "M"
         ],
         "age": [
           "young",
@@ -47,12 +47,12 @@
     {
       "name": "Eeasterners",
       "criteria": {
+        "gender": [
+          "M"
+        ],
         "state": [
           "NY",
           "NJ"
-        ],
-        "gender": [
-          "M"
         ],
         "age": [
           "middle",
@@ -64,17 +64,17 @@
     {
       "name": "young women",
       "criteria": {
+        "content": [
+          "fashion",
+          "food",
+          "news"
+        ],
         "income": [
           "affluent",
           "middle"
         ],
         "gender": [
           "F"
-        ],
-        "content": [
-          "fashion",
-          "food",
-          "news"
         ],
         "age": [
           "young",
@@ -92,14 +92,14 @@
           "NE",
           "KS"
         ],
+        "content": [
+          "sport"
+        ],
         "income": [
           "middle"
         ],
         "gender": [
           "M"
-        ],
-        "content": [
-          "sport"
         ],
         "age": [
           "middle",
@@ -186,15 +186,15 @@
         "state": [
           "CA"
         ],
+        "content": [
+          "fashion",
+          "food"
+        ],
         "income": [
           "middle"
         ],
         "gender": [
           "F"
-        ],
-        "content": [
-          "fashion",
-          "food"
         ],
         "age": [
           "young"
@@ -236,12 +236,12 @@
         "income": [
           "affluent"
         ],
-        "gender": [
-          "M"
-        ],
         "content": [
           "business",
           "news"
+        ],
+        "gender": [
+          "M"
         ],
         "age": [
           "middle"
@@ -272,18 +272,18 @@
     },
     {
       "criteria": {
-        "state": [
-          "NJ"
-        ],
-        "income": [
-          "affluent"
-        ],
         "gender": [
           "M"
         ],
         "content": [
           "news",
           "business"
+        ],
+        "state": [
+          "NJ"
+        ],
+        "income": [
+          "affluent"
         ],
         "age": [
           "middle"
@@ -314,6 +314,10 @@
     },
     {
       "criteria": {
+        "content": [
+          "news",
+          "business"
+        ],
         "state": [
           "CA"
         ],
@@ -322,10 +326,6 @@
         ],
         "gender": [
           "M"
-        ],
-        "content": [
-          "news",
-          "business"
         ],
         "age": [
           "middle"
@@ -349,9 +349,6 @@
     },
     {
       "criteria": {
-        "state": [
-          "KS"
-        ],
         "income": [
           "middle"
         ],
@@ -361,6 +358,9 @@
         "content": [
           "sport",
           "food"
+        ],
+        "state": [
+          "KS"
         ],
         "age": [
           "middle"
@@ -395,17 +395,38 @@
     },
     {
       "criteria": {
-        "income": [
-          "middle"
-        ],
         "gender": [
           "F"
+        ],
+        "income": [
+          "middle"
         ],
         "age": [
           "young"
         ]
       },
       "count": 280000
+    },
+     {
+      "criteria": {
+        "state": [
+          "KS"
+        ],
+        "content": [
+          "food",
+          "sport"
+        ],
+        "income": [
+          "middle"
+        ],
+        "gender": [
+          "M"
+        ],
+        "age": [
+          "middle"
+        ]
+      },
+      "count": 10000
     },
     {
       "criteria": {

@@ -1,6 +1,6 @@
 select lpad(bin(set_key_new), 10, '0') as setkey_new, lpad(bin(set_key_old), 10, '0') as setkey_old from fully_included_sets;
 
-select set_key_is, lpad(bin(set_key), 10, '0') as set_key, set_name, capacity, availability, goal from structured_data_base;
+select set_key_is, lpad(bin(set_key), 10, '0') as set_key, set_name, capacity, availability, goal, criteria from structured_data_base;
 select lpad(bin(set_key), 10, '0') as set_key, set_name, capacity, availability, goal from structured_data_inc -- order by capacity
 ;
 call GetItemsFromSD(
@@ -8,7 +8,10 @@ call GetItemsFromSD(
 
 select lpad(bin(set_key), 10, '0') as set_key, set_name, capacity, availability, goal from unions_next_rank; -- order by capacity
 
-select lpad(bin(basesets), 10, '0') as set_key, count from raw_inventory;	
+select lpad(bin(basesets), 10, '0') as set_key, count from raw_inventory;
+
+select lpad(bin(basesets), 10, '0') as basesets, count, criteria from raw_inventory_ex;   
+
 
 --
 -- testing aids

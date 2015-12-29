@@ -149,12 +149,13 @@ public class ProcessInputInc {
 	            
 	            // populate structured data with inventory sets
 	            insertStatement = con.prepareStatement
-	            		("INSERT IGNORE INTO structured_data_base SET set_key = ?, set_name = ?, set_key_is = ?");
+	            		("INSERT IGNORE INTO structured_data_base SET set_key = ?, set_name = ?, set_key_is = ?, criteria = ?");
 	            for (BaseSet bs1 : base_sets.values()) {
 	            	// insertStatement.setBytes(1, bs1.getKeyVarBin());
 	            	insertStatement.setLong(1, bs1.getKeyBin()[0]);
 		            insertStatement.setString(2, bs1.getname());
 	            	insertStatement.setLong(3, bs1.getKeyBin()[0]);
+	            	insertStatement.setString(4, bs1.getCriteria().toString());
 		            insertStatement.execute();
 	            }
 	            
@@ -163,10 +164,11 @@ public class ProcessInputInc {
 	            
 	            // populate raw data with inventory sets' bitmaps
 	            insertStatement = con.prepareStatement
-	            		("INSERT INTO raw_inventory_ex SET basesets = ?, count = ?");
+	            		("INSERT INTO raw_inventory_ex SET basesets = ?, count = ?, criteria = ?");
 	            for (BaseSegement bs1 : base_segments.values()) {
 	            	insertStatement.setLong(1, bs1.getKeyBin()[0]);
 	            	insertStatement.setInt(2, bs1.getcapacity());
+	            	insertStatement.setString(3, bs1.getCriteria().toString());
 		            insertStatement.execute();
 	            }
 	            
