@@ -16,7 +16,6 @@ public class Simulation {
         ResultSet rs1 = null;
         PreparedStatement clearResultStatement=null;
         PreparedStatement clearMissesStatement=null;
-        PreparedStatement countStatement = null;
         PreparedStatement updateRawData = null;
         PreparedStatement controlStatement = null;
         PreparedStatement getWeightStatement = null;
@@ -37,9 +36,19 @@ public class Simulation {
             clearResultStatement = con.prepareStatement("delete from result_data");
             clearResultStatement.execute();
             clearMissesStatement =con.prepareStatement("delete from misses");
-            // read raw_data_weighted table
-            countStatement = con.prepareStatement("select max(weight), count(*) from raw_data_weighted");
-            rs = countStatement.executeQuery();
+            // read raw_data table
+            PreparedStatement max_weightStatement = con.prepareStatement("select max(weight) from raw_data");
+            rs = max_weightStatement.executeQuery();
+            if (!rs.next())
+            	break; // no raw data
+            int max_weight = rs.getInt(1);
+            PreparedStatement weightStatement = con.prepareStatement("select min(weight) from raw_data where weight <= ?");
+            weightStatement.setInt(1, rand.nextInt(max_weight));            
+            rs = weightStatement.executeQuery();
+            
+            
+            
+            
             rs.next();
             int max_weight = rs.getInt(1);
             int weight_count = rs.getInt(2);
@@ -143,8 +152,8 @@ public class Simulation {
             lgr.log(Level.SEVERE, ex.getMessage(), ex);
         } finally {
             try {
-                if (countStatement != null) {
-                	countStatement.close();
+                if (weightStatement != null) {
+                	weightStatement.close();
                 }
                 if (getWeightStatement != null) {
                 	getWeightStatement.close();
