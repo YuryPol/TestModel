@@ -36,3 +36,5 @@ BEGIN
   FROM structured_data_base; 
 END //
 DELIMITER ;
+
+select basesets, weight from raw_inventory where weight <= 860000 order BY weight desc limit 1;

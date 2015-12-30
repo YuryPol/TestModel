@@ -14,16 +14,6 @@ public class Simulation {
         Connection con = null;
         ResultSet rs = null;
         ResultSet rs1 = null;
-        PreparedStatement clearResultStatement=null;
-        PreparedStatement clearMissesStatement=null;
-        PreparedStatement updateRawData = null;
-        PreparedStatement controlStatement = null;
-        PreparedStatement getWeightStatement = null;
-        PreparedStatement getCriteiaStatement = null;
-        PreparedStatement getGoalStatement = null;
-        PreparedStatement updateResultData = null;
-        PreparedStatement updateMissedCalls = null;
-        PreparedStatement getServedCountStatement = null;
         String url = "jdbc:mysql://localhost:3306/demo";
         String user = "root";
         String password = "IraAnna12";
@@ -33,19 +23,39 @@ public class Simulation {
             con = DriverManager.getConnection(url, user, password);
             
             // clear the results
-            clearResultStatement = con.prepareStatement("delete from result_data");
+            PreparedStatement clearResultStatement = con.prepareStatement("delete from result_data");
             clearResultStatement.execute();
-            clearMissesStatement =con.prepareStatement("delete from misses");
-            // read raw_data table
-            PreparedStatement max_weightStatement = con.prepareStatement("select max(weight) from raw_data");
+            PreparedStatement clearMissesStatement =con.prepareStatement("delete from misses");
+            // read raw_inventory table
+            PreparedStatement max_weightStatement = con.prepareStatement("select max(weight) from raw_inventory");
             rs = max_weightStatement.executeQuery();
             if (!rs.next())
             	break; // no raw data
             int max_weight = rs.getInt(1);
-            PreparedStatement weightStatement = con.prepareStatement("select min(weight) from raw_data where weight <= ?");
-            weightStatement.setInt(1, rand.nextInt(max_weight));            
-            rs = weightStatement.executeQuery();
-            
+            PreparedStatement getDataStatement = con.prepareStatement("select basesets  from raw_inventory where weight <= ? order BY weight desc limit 1");
+            PreparedStatement choseInventorySet = con.prepareStatement(
+            		"select set_key_is, (goal-served_count)/goal as weight_now from result_serving where goal > served_count and ( ? | set_key_is ) = set_key_is order by weight_now desc limit 1;");
+            PreparedStatement incrementServedCount = con.prepareStatement("update result_serving set served_count = served_count - 1 where set_key_is = ? and served_count > 0");
+            //
+            // Process raw inventory
+            //
+            do {
+	            // create the request
+	            getDataStatement.setInt(1, rand.nextInt(max_weight));
+	            rs = getDataStatement.executeQuery();
+	            long basesets = rs.getInt(1);
+	            // select inventory set to serve
+	            choseInventorySet.setLong(1, basesets);
+	            rs = choseInventorySet.executeQuery();
+	            if (!rs.next())
+	            	continue; // inventory set was served
+	            long set_key_is = rs.getLong(1);
+	            // increment served_count in result_serving
+	            incrementServedCount.setLong(1, set_key_is);
+	            rs = incrementServedCount.executeQuery();
+	            
+	            
+             
             
             
             

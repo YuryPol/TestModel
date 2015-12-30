@@ -69,16 +69,12 @@ INSERT INTO unions_next_rank
    SELECT *
    FROM structured_data_inc;
 
--- start unions_prev_rank table
--- INSERT INTO unions_prev_rank 
---    SELECT BIT_OR(set_key)  -- highest rank union set's key
---    , NULL, NULL, NULL, NULL, 0
---    FROM structured_data_inc;
-
 -- SET max_sp_recursion_depth=255;
 CALL AddUnions; -- creates unions
--- call PopulateWithNumbers; -- adds capacities and availabilities to structured_data_inc
--- call EliminateUnions; -- deleats non-overlapping unions creatd by AdUnions
 
--- call CompactStructData;
--- call CompactStructData; -- called twice to compact new nodes of higher rank
+-- create results table for impressions served
+DROP TABLE IF EXISTS result_serving;
+CREATE TABLE result_serving AS
+SELECT *, 0 AS served_count
+FROM structured_data_base;
+
