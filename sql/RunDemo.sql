@@ -75,6 +75,10 @@ CALL AddUnions; -- creates unions
 -- create results table for impressions served
 DROP TABLE IF EXISTS result_serving;
 CREATE TABLE result_serving AS
-SELECT *, 0 AS served_count
-FROM structured_data_base;
+    SELECT *, 0 AS served_count
+    FROM structured_data_base;
 
+DROP TABLE IF EXISTS raw_inventory_used;
+CREATE TABLE raw_inventory_used AS
+    SELECT *, 0 AS served_count, 0 AS missed_count
+    FROM raw_inventory;
