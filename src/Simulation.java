@@ -22,19 +22,13 @@ public class Simulation {
         try {
             con = DriverManager.getConnection(url, user, password);
             
-            // clear the results
-            PreparedStatement clearResultStatement = con.prepareStatement("delete from result_serving");
-            clearResultStatement.execute();
-            PreparedStatement clearMissesStatement =con.prepareStatement("delete from raw_inventory_used");
-            clearMissesStatement.executeQuery();
-            
             // read result_serving table
-            PreparedStatement max_weightStatement = con.prepareStatement("select max(weight) from result_serving");
+            PreparedStatement max_weightStatement = con.prepareStatement("select max(weight) from raw_inventory_used");
             rs = max_weightStatement.executeQuery();
             if (!rs.next())
             	return; // no raw data
             int max_weight = Math.abs(rs.getInt(1));
-            PreparedStatement getRequest = con.prepareStatement("select basesets from raw_inventory where weight >= ? order by weight asc limit 1");
+            PreparedStatement getRequest = con.prepareStatement("select basesets from raw_inventory_used where weight >= ? order by weight asc limit 1");
             PreparedStatement choseInventorySet = con.prepareStatement(
             		"select set_key_is, (goal-served_count)/goal as weight_now from result_serving "
             		+ "where goal > served_count and ( ? | set_key_is ) = set_key_is order by weight_now desc limit 1;");
@@ -46,8 +40,9 @@ public class Simulation {
 //            OR (userid1 = 4 AND userid2 = 3);
             PreparedStatement changeRawServedCount = con.prepareStatement(
             		"update raw_inventory_used set "
-            		+ " served_count case when ? & ? != 0 then served_count + 1 else served_count,"
-            		+ " missed_count case when ? & ? == 0 then missed_count + 1 else missed_count end;");
+            		+ " served_count = case when ? & ? != 0 then served_count + 1 else served_count end,"
+            		+ " missed_count = case when ? & ?  = 0 then missed_count + 1 else missed_count end"
+            		+ " where basesets = ?;");
             //
             // Process raw inventory
             //
@@ -55,7 +50,9 @@ public class Simulation {
 	            // create the request
 	            getRequest.setInt(1, rand.nextInt(max_weight));
 	            rs = getRequest.executeQuery();
-	            long basesets = rs.getInt(1);
+	            if (!rs.next()) // should not happen
+	            	continue;
+	            long basesets = rs.getLong(1);
 	            // select inventory set to serve
 	            choseInventorySet.setLong(1, basesets);
 	            rs = choseInventorySet.executeQuery();
@@ -69,9 +66,12 @@ public class Simulation {
 	            	rs = incrementServedCount.executeQuery();
 	            }
 	            // increment served_count in result_serving
-	            changeRawServedCount.setLong(1, basesets);	            
+	            changeRawServedCount.setLong(1, basesets);	// TODO: replace with setArray.            
 	            changeRawServedCount.setLong(2, set_key_is);
-	            rs = changeRawServedCount.executeQuery();
+	            changeRawServedCount.setLong(3, basesets);	            
+	            changeRawServedCount.setLong(4, set_key_is);
+	            changeRawServedCount.setLong(5, basesets);	            
+	            changeRawServedCount.executeUpdate();
             }
 	            
         } catch (SQLException ex) {
