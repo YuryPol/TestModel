@@ -35,6 +35,18 @@ CREATE TABLE structured_data_inc(
 ;
 -- it will be initially populated by ProcessInputInc.java with 0-rank records
 
+-- create structured data table
+DROP TABLE IF EXISTS structured_data_inc2;
+CREATE TABLE structured_data_inc2(
+    set_key BIGINT DEFAULT NULL,
+    set_name VARCHAR(20) DEFAULT NULL,
+--    rank INT DEFAULT NULL,
+    capacity INT DEFAULT NULL, 
+    availability INT DEFAULT NULL, 
+    goal INT DEFAULT 0,
+    PRIMARY KEY(set_key))
+;
+
 -- create inventroy sets table
 DROP TABLE IF EXISTS structured_data_base;
 CREATE TABLE structured_data_base( 
@@ -188,29 +200,28 @@ BEGIN
 END //
 DELIMITER ;
 
-DROP PROCEDURE IF EXISTS CompactStructData;
-DELIMITER //
-CREATE PROCEDURE CompactStructData()
-BEGIN	
-CREATE TEMPORARY TABLE IF NOT EXISTS struct_data_tmp;
-TRUNCATE struct_data_tmp;
-INSERT INTO struct_data_tmp SELECT * FROM structured_data_inc;
--- delete nodes of lower rank with the same availability
-DELETE FROM structured_data_inc
-WHERE EXISTS (
-    SELECT *
-    FROM struct_data_tmp sdt
-    WHERE (structured_data_inc.set_key & sdt.set_key) = structured_data_inc.set_key
-    AND structured_data_inc.set_key > sdt.set_key
-    AND structured_data_inc.availability = sdt.availability);    
--- link from structured_data_base
-UPDATE structured_data_base, structured_data_inc
-    SET structured_data_base.set_key = structured_data_inc.set_key
-    WHERE structured_data_base.set_key_is & structured_data_inc.set_key = structured_data_base.set_key_is
-    AND structured_data_base.availability = structured_data_inc.availability
-;
-END //
-DELIMITER ;
+-- DROP PROCEDURE IF EXISTS CompactStructData;
+-- DELIMITER //
+-- CREATE PROCEDURE CompactStructData()
+-- BEGIN	
+-- TRUNCATE struct_data_tmp;
+-- INSERT INTO struct_data_tmp SELECT * FROM structured_data_inc;
+---- delete nodes of lower rank with the same availability
+-- DELETE FROM structured_data_inc
+-- WHERE EXISTS (
+--    SELECT *
+--    FROM struct_data_tmp sdt
+--    WHERE (structured_data_inc.set_key & sdt.set_key) = structured_data_inc.set_key
+--    AND structured_data_inc.set_key > sdt.set_key
+--    AND structured_data_inc.availability = sdt.availability);    
+-- -- link from structured_data_base
+-- UPDATE structured_data_base, structured_data_inc
+--    SET structured_data_base.set_key = structured_data_inc.set_key
+--    WHERE structured_data_base.set_key_is & structured_data_inc.set_key = structured_data_base.set_key_is
+--    AND structured_data_base.availability = structured_data_inc.availability
+--;
+-- END //
+-- DELIMITER ;
 
 -- book an amount of items
 DROP FUNCTION IF EXISTS BookItemsFromIS;
@@ -246,11 +257,10 @@ BEGIN
         SET availability = availability - amount 
         WHERE (set_key & iset) = iset;
      -- update structured data with rule #2
-     CREATE TEMPORARY TABLE IF NOT EXISTS struct_data_tmp;
-     TRUNCATE struct_data_tmp;
-     INSERT INTO struct_data_tmp SELECT * FROM structured_data_inc;
-     UPDATE structured_data_inc sd, struct_data_tmp sdt  
-       SET sd.availability = (SELECT min(sdt.availability) FROM struct_data_tmp sdt
+     TRUNCATE structured_data_inc2;
+     INSERT INTO structured_data_inc2 SELECT * FROM structured_data_inc;
+     UPDATE structured_data_inc sd, structured_data_inc2 sdt  
+       SET sd.availability = (SELECT min(sdt.availability) FROM structured_data_inc2 sdt
          WHERE (sd.set_key & sdt.set_key) = sd.set_key AND sd.set_key <= sdt.set_key);       
          -- propagate the changes into base table
      UPDATE structured_data_base sb, structured_data_inc sd

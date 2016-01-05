@@ -3,6 +3,8 @@ select lpad(bin(set_key_new), 10, '0') as setkey_new, lpad(bin(set_key_old), 10,
 select set_key_is, lpad(bin(set_key), 10, '0') as set_key, set_name, capacity, availability, goal, criteria from structured_data_base;
 select lpad(bin(set_key), 10, '0') as set_key, set_name, capacity, availability, goal from structured_data_inc -- order by capacity
 ;
+
+select set_key_is, set_name, capacity, availability, goal from structured_data_base;
 call GetItemsFromSD(
 1,10);
 
@@ -12,6 +14,9 @@ select lpad(bin(basesets), 10, '0') as set_key, count from raw_inventory;
 
 select lpad(bin(basesets), 10, '0') as basesets, count, criteria from raw_inventory_ex;   
 
+select lpad(bin(set_key_is), 10, '0') as set_key_is, lpad(bin(50), 10, '0') as baseset from result_serving;
+
+select set_key_is, lpad(bin(set_key), 10, '0') as set_key, capacity, availability, goal, served_count from result_serving;
 
 --
 -- testing aids
@@ -37,4 +42,4 @@ BEGIN
 END //
 DELIMITER ;
 
-select basesets, weight from raw_inventory where weight <= 860000 order BY weight desc limit 1;
+

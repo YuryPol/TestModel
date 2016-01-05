@@ -26,11 +26,4 @@
 		<nature>org.eclipse.jdt.core.javanature</nature>
 		<nature>com.dell.toadext.ToadextNature</nature>
 	</natures>
-	<linkedResources>
-		<link>
-			<name>src/Simulation.java</name>
-			<type>1</type>
-			<location>C:/Users/Yury/Documents/GitHub/TestModel/src/Simulation.java</location>
-		</link>
-	</linkedResources>
 </projectDescription>

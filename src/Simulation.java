@@ -3,6 +3,8 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -14,15 +16,21 @@ public class Simulation {
         Connection con = null;
         ResultSet rs = null;
         ResultSet rs1 = null;
+        int result = 0;
         String url = "jdbc:mysql://localhost:3306/demo";
         String user = "root";
         String password = "IraAnna12";
         
+        System.out.println(
+                new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(new Date()));
         Random rand= new Random();
         try {
             con = DriverManager.getConnection(url, user, password);
             
-            // read result_serving table
+            PreparedStatement createResultServingTable = con.prepareStatement("DROP TABLE IF EXISTS result_serving; "
+            + "CREATE TABLE result_serving AS SELECT *, 0 AS served_count FROM structured_data_base;");
+            int[] resultArray = createResultServingTable.executeBatch();
+            // process result_serving table
             PreparedStatement max_weightStatement = con.prepareStatement("select max(weight) from raw_inventory_used");
             rs = max_weightStatement.executeQuery();
             if (!rs.next())
@@ -31,7 +39,7 @@ public class Simulation {
             PreparedStatement getRequest = con.prepareStatement("select basesets from raw_inventory_used where weight >= ? order by weight asc limit 1");
             PreparedStatement choseInventorySet = con.prepareStatement(
             		"select set_key_is, (goal-served_count)/goal as weight_now from result_serving "
-            		+ "where goal > served_count and ( ? | set_key_is ) = set_key_is order by weight_now desc limit 1;");
+            		+ "where goal > served_count and ( ? & set_key_is ) = set_key_is order by weight_now desc limit 1;");
             PreparedStatement incrementServedCount = con.prepareStatement("update result_serving set served_count = served_count + 1 where set_key_is = ?");
 //            UPDATE relation 
 //            SET name1 = CASE WHEN userid1 = 3 THEN 'jack' ELSE name1 END,
@@ -63,7 +71,7 @@ public class Simulation {
 	            	// otherwise record the miss
 	            	set_key_is = rs.getLong(1);
 	            	incrementServedCount.setLong(1, set_key_is);
-	            	rs = incrementServedCount.executeQuery();
+	            	result = incrementServedCount.executeUpdate();
 	            }
 	            // increment served_count in result_serving
 	            changeRawServedCount.setLong(1, basesets);	// TODO: replace with setArray.            
@@ -72,8 +80,9 @@ public class Simulation {
 	            changeRawServedCount.setLong(4, set_key_is);
 	            changeRawServedCount.setLong(5, basesets);	            
 	            changeRawServedCount.executeUpdate();
-            }
-	            
+            }	            
+            System.out.println(
+                    new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(new Date()));
         } catch (SQLException ex) {
             Logger lgr = Logger.getLogger(Simulation.class.getName());
             lgr.log(Level.SEVERE, ex.getMessage(), ex);
