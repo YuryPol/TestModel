@@ -72,12 +72,6 @@ INSERT INTO unions_next_rank
 -- SET max_sp_recursion_depth=255;
 CALL AddUnions; -- creates unions
 
--- create results table for impressions served
-DROP TABLE IF EXISTS result_serving;
-CREATE TABLE result_serving AS
-    SELECT *, 0 AS served_count
-    FROM structured_data_base;
-
 DROP TABLE IF EXISTS raw_inventory_used;
 CREATE TABLE raw_inventory_used AS
     SELECT *, 0 AS served_count, 0 AS missed_count
