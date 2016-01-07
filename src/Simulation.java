@@ -27,8 +27,10 @@ public class Simulation {
         try {
             con = DriverManager.getConnection(url, user, password);
             
-            PreparedStatement createResultServingTable = con.prepareStatement("DROP TABLE IF EXISTS result_serving; "
-            + "CREATE TABLE result_serving AS SELECT *, 0 AS served_count FROM structured_data_base;");
+            PreparedStatement createResultServingTable = con.prepareStatement("DROP TABLE IF EXISTS result_serving;");
+            createResultServingTable.executeUpdate();
+            createResultServingTable = con.prepareStatement("CREATE TABLE result_serving  ENGINE=MEMORY AS SELECT *, 0 AS served_count FROM structured_data_base;");
+            createResultServingTable.executeUpdate();
             int[] resultArray = createResultServingTable.executeBatch();
             // process result_serving table
             PreparedStatement max_weightStatement = con.prepareStatement("select max(weight) from raw_inventory_used");

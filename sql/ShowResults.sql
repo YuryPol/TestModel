@@ -12,7 +12,7 @@ select lpad(bin(basesets), 10, '0') as set_key, count from raw_inventory;
 
 select lpad(bin(basesets), 10, '0') as basesets, count, criteria from raw_inventory_ex;   
 
-select lpad(bin(set_key_is), 10, '0') as set_key_is, lpad(bin(50), 10, '0') as baseset from result_serving;
+select lpad(bin(set_key_is), 10, '0') as set_key_is, lpad(bin(set_key), 10, '0') as baseset from result_serving;
 
 select set_key_is, lpad(bin(set_key), 10, '0') as set_key, capacity, availability, goal, served_count from result_serving;
 
