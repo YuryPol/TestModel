@@ -1,5 +1,3 @@
-select lpad(bin(set_key_new), 10, '0') as setkey_new, lpad(bin(set_key_old), 10, '0') as setkey_old from fully_included_sets;
-
 select set_key_is, lpad(bin(set_key), 10, '0') as set_key, set_name, capacity, availability, goal, criteria from structured_data_base;
 select lpad(bin(set_key), 10, '0') as set_key, set_name, capacity, availability, goal from structured_data_inc -- order by capacity
 ;
@@ -22,9 +20,9 @@ select set_key_is, lpad(bin(set_key), 10, '0') as set_key, capacity, availabilit
 -- testing aids
 --
 
-DROP PROCEDURE IF EXISTS GetTotalAvailability;
+DROP PROCEDURE IF EXISTS GetTotalCapacity;
 DELIMITER //
-CREATE PROCEDURE GetTotalAvailability()
+CREATE PROCEDURE GetTotalCapacity()
 BEGIN
   SELECT 
     SUM(count) as total_capacity

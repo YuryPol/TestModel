@@ -246,6 +246,37 @@ END //
 DELIMITER ;
 
 -- getting an amount of items from structured data
+-- DROP PROCEDURE IF EXISTS GetItemsFromSD;
+-- DELIMITER //
+-- CREATE PROCEDURE GetItemsFromSD(IN iset BIGINT, IN amount INT)
+-- BEGIN
+--   IF BookItemsFromIS(iset, amount)
+--   THEN
+--     -- update structured data with rule #1
+--     UPDATE structured_data_inc 
+--        SET availability = availability - amount 
+--        WHERE (set_key & iset) = iset;
+--     -- update structured data with rule #2
+--     TRUNCATE structured_data_inc2;
+--     INSERT INTO structured_data_inc2 SELECT * FROM structured_data_inc;
+--     UPDATE structured_data_inc sd, structured_data_inc2 sdt  
+--       SET sd.availability = (SELECT min(sdt.availability) FROM structured_data_inc2 sdt
+--         WHERE (sd.set_key & sdt.set_key) = sd.set_key AND sd.set_key <= sdt.set_key);       
+--         -- propagate the changes into base table
+--     UPDATE structured_data_base sb, structured_data_inc sd
+--     SET sb.availability = LEAST(sb.availability, sd.availability)
+--     WHERE sd.set_key & sb.set_key_is = sb.set_key_is;     
+--     -- remove unneeded nodes
+--     -- call CompactStructData;
+--     -- call CompactStructData; -- called twice to compact new nodes of higher rank
+--     SELECT 'passed';
+--   ELSE
+--     SELECT 'failed';
+--   END IF;
+-- END //
+-- DELIMITER ;
+
+-- getting an amount of items from structured data, second try with deleting lower order nodes.
 DROP PROCEDURE IF EXISTS GetItemsFromSD;
 DELIMITER //
 CREATE PROCEDURE GetItemsFromSD(IN iset BIGINT, IN amount INT)
@@ -257,18 +288,18 @@ BEGIN
         SET availability = availability - amount 
         WHERE (set_key & iset) = iset;
      -- update structured data with rule #2
-     TRUNCATE structured_data_inc2;
-     INSERT INTO structured_data_inc2 SELECT * FROM structured_data_inc;
-     UPDATE structured_data_inc sd, structured_data_inc2 sdt  
-       SET sd.availability = (SELECT min(sdt.availability) FROM structured_data_inc2 sdt
-         WHERE (sd.set_key & sdt.set_key) = sd.set_key AND sd.set_key <= sdt.set_key);       
-         -- propagate the changes into base table
-     UPDATE structured_data_base sb, structured_data_inc sd
+     DROP TABLE IF EXISTS sdtmp;
+     CREATE TABLE sdtmp AS SELECT set_key, availability FROM structured_data_inc WHERE set_key & iset = iset;
+     DELETE FROM structured_data_inc WHERE set_key = ANY (
+        SELECT sd1.set_key
+        FROM sdtmp sd1 JOIN sdtmp sd2
+        ON sd2.set_key > sd1.set_key 
+        AND sd2.set_key & sd1.set_key = sd1.set_key 
+        AND sd1.availability >= sd2.availability);        
+     -- propagate the changes into base table
+     UPDATE structured_data_base sb, structured_data_inc sd     
      SET sb.availability = LEAST(sb.availability, sd.availability)
      WHERE sd.set_key & sb.set_key_is = sb.set_key_is;     
-     -- remove unneeded nodes
-     -- call CompactStructData;
-     -- call CompactStructData; -- called twice to compact new nodes of higher rank
      SELECT 'passed';
    ELSE
      SELECT 'failed';

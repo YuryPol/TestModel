@@ -15,11 +15,11 @@ public class Simulation {
 	public static void main(String[] args) {
         Connection con = null;
         ResultSet rs = null;
-        ResultSet rs1 = null;
-        int result = 0;
         String url = "jdbc:mysql://localhost:3306/demo";
         String user = "root";
         String password = "IraAnna12";
+        int served_count = 0;
+        int missed_count = 0;
         
         System.out.println(
                 new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(new Date()));
@@ -41,16 +41,11 @@ public class Simulation {
             		"select set_key_is, (goal-served_count)/goal as weight_now from result_serving "
             		+ "where goal > served_count and ( ? & set_key_is ) = set_key_is order by weight_now desc limit 1;");
             PreparedStatement incrementServedCount = con.prepareStatement("update result_serving set served_count = served_count + 1 where set_key_is = ?");
-//            UPDATE relation 
-//            SET name1 = CASE WHEN userid1 = 3 THEN 'jack' ELSE name1 END,
-//                name2 = CASE WHEN userid2 = 3 THEN 'jack' ELSE name2 END
-//            WHERE (userid1 = 3 AND userid2 = 4) 
-//            OR (userid1 = 4 AND userid2 = 3);
-            PreparedStatement changeRawServedCount = con.prepareStatement(
-            		"update raw_inventory_used set "
-            		+ " served_count = case when ? & ? != 0 then served_count + 1 else served_count end,"
-            		+ " missed_count = case when ? & ?  = 0 then missed_count + 1 else missed_count end"
-            		+ " where basesets = ?;");
+//            PreparedStatement changeRawServedCount = con.prepareStatement(
+//            		"update raw_inventory_used set "
+//            		+ " served_count = case when ? & ? != 0 then served_count + 1 else served_count end,"
+//            		+ " missed_count = case when ? & ?  = 0 then missed_count + 1 else missed_count end"
+//            		+ " where basesets = ?;");
             //
             // Process raw inventory
             //
@@ -71,16 +66,20 @@ public class Simulation {
 	            	// otherwise record the miss
 	            	set_key_is = rs.getLong(1);
 	            	incrementServedCount.setLong(1, set_key_is);
-	            	result = incrementServedCount.executeUpdate();
+	            	int result = incrementServedCount.executeUpdate();
+	            	served_count++;
 	            }
+	            else
+	            	missed_count++;
 	            // increment served_count in result_serving
-	            changeRawServedCount.setLong(1, basesets);	// TODO: replace with setArray.            
-	            changeRawServedCount.setLong(2, set_key_is);
-	            changeRawServedCount.setLong(3, basesets);	            
-	            changeRawServedCount.setLong(4, set_key_is);
-	            changeRawServedCount.setLong(5, basesets);	            
-	            changeRawServedCount.executeUpdate();
-            }	            
+//	            changeRawServedCount.setLong(1, basesets);	// TODO: replace with setArray.            
+//	            changeRawServedCount.setLong(2, set_key_is);
+//	            changeRawServedCount.setLong(3, basesets);	            
+//	            changeRawServedCount.setLong(4, set_key_is);
+//	            changeRawServedCount.setLong(5, basesets);	            
+//	            changeRawServedCount.executeUpdate();
+            }
+            System.out.println("served_count=" +  String.valueOf(served_count) + ", missed_count=" + String.valueOf(missed_count));
             System.out.println(
                     new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(new Date()));
         } catch (SQLException ex) {
