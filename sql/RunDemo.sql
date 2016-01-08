@@ -1,10 +1,5 @@
 /* 
-  Populates existing initial structured and raw data tables from JSON file
- the process:
- before the start run on cmd prompt:
-   java -cp "C:/Program Files (x86)/MySQL/MySQL Connector J/mysql-connector-java-5.1.36-bin.jar";C:/Users/ypolyako/workspace/TestModel/bin ProcessInputInc
- then luanch the script:
-   "C:\Program Files\MySQL\MySQL Server 5.6\bin\mysql.exe" "--defaults-file=C:\ProgramData\MySQL\MySQL Server 5.6\my.ini" "--verbose" "-uroot" "-pIraAnna12" < "C:\Users\ypolyako\workspace\TestModel\sql\RunDemo.sql"
+ * Runs at every session
  */
  
 USE Demo;
@@ -18,7 +13,7 @@ CREATE /*TEMPORARY*/ TABLE unions_last_rank(
     capacity INT DEFAULT NULL, 
     availability INT DEFAULT NULL, 
     goal INT DEFAULT 0,
-    PRIMARY KEY(set_key))
+    PRIMARY KEY(set_key)) /*ENGINE=MEMORY*/
 ;
 
 DROP /*TEMPORARY*/ TABLE IF EXISTS unions_next_rank;
@@ -29,7 +24,7 @@ CREATE /*TEMPORARY*/ TABLE unions_next_rank(
     capacity INT DEFAULT NULL, 
     availability INT DEFAULT NULL, 
     goal INT DEFAULT 0,
-    PRIMARY KEY(set_key))
+    PRIMARY KEY(set_key)) /*ENGINE=MEMORY*/
 ;
 
 DROP TABLE IF EXISTS raw_inventory;
@@ -71,8 +66,3 @@ INSERT INTO unions_next_rank
 
 -- SET max_sp_recursion_depth=255;
 CALL AddUnions; -- creates unions
-
-DROP TABLE IF EXISTS raw_inventory_used;
-CREATE TABLE raw_inventory_used AS
-    SELECT *, 0 AS served_count, 0 AS missed_count
-    FROM raw_inventory;
