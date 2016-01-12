@@ -46,6 +46,13 @@ CREATE TABLE structured_data_base(
 ;
 --  it will be populated after executing ProcessInputInc.java and call PopulateRankWithNumbers;
 
+-- create working copy of inventroy sets table
+DROP TABLE IF EXISTS sdtmp;
+CREATE TABLE sdtmp( 
+    set_key BIGINT DEFAULT NULL,
+    availability INT DEFAULT NULL)
+;
+
 --
 -- setting up stored procs
 --
@@ -161,18 +168,26 @@ BEGIN
         SET availability = availability - amount 
         WHERE (set_key & iset) = iset;
      -- update structured data with rule #2
-     DROP TABLE IF EXISTS sdtmp;
-     CREATE TABLE sdtmp AS SELECT set_key, availability FROM structured_data_inc WHERE set_key & iset = iset;
-     DELETE FROM structured_data_inc WHERE set_key = ANY (
-        SELECT sd1.set_key
-        FROM sdtmp sd1 JOIN sdtmp sd2
-        ON sd2.set_key > sd1.set_key 
-        AND sd2.set_key & sd1.set_key = sd1.set_key 
-        AND sd1.availability >= sd2.availability);        
+     label1: LOOP
+       TRUNCATE sdtmp;
+       INSERT /*IGNORE*/ INTO  sdtmp
+          SELECT set_key, availability FROM structured_data_inc WHERE set_key & iset = iset;
+       SELECT @row_cnt:=ROW_COUNT();
+       IF @row_cnt > 0 THEN
+       DELETE FROM structured_data_inc WHERE set_key = ANY (
+          SELECT sd1.set_key
+          FROM sdtmp sd1 JOIN sdtmp sd2
+          ON sd2.set_key > sd1.set_key 
+          AND sd2.set_key & sd1.set_key = sd1.set_key 
+          AND sd1.availability >= sd2.availability);
+          ITERATE label1;
+       END IF;
+       LEAVE label1;
+     END LOOP label1;  
      -- propagate the changes into base table
-     UPDATE structured_data_base sb, structured_data_inc sd     
+     UPDATE structured_data_base sb, structured_data_inc sd
      SET sb.availability = LEAST(sb.availability, sd.availability)
-     WHERE sd.set_key & sb.set_key_is = sb.set_key_is;     
+     WHERE sd.set_key & sb.set_key_is = sb.set_key_is;
      SELECT 'passed';
    ELSE
      SELECT 'failed';

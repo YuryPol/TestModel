@@ -30,6 +30,16 @@ BEGIN
 END //
 DELIMITER ;
 
+DROP PROCEDURE IF EXISTS GetTotalAvailability;
+DELIMITER //
+CREATE PROCEDURE GetTotalAvailability()
+BEGIN
+  SELECT 
+    SUM(availability) as total_availability
+  FROM structured_data_base; 
+END //
+DELIMITER ;
+
 DROP PROCEDURE IF EXISTS GetTotalGoals;
 DELIMITER //
 CREATE PROCEDURE GetTotalGoals()
