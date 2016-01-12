@@ -46,13 +46,6 @@ CREATE TABLE structured_data_base(
 ;
 --  it will be populated after executing ProcessInputInc.java and call PopulateRankWithNumbers;
 
--- create working copy of inventroy sets table
-DROP TABLE IF EXISTS sdtmp;
-CREATE TABLE sdtmp( 
-    set_key BIGINT DEFAULT NULL,
-    availability INT DEFAULT NULL)
-;
-
 --
 -- setting up stored procs
 --
@@ -168,14 +161,14 @@ BEGIN
         SET availability = availability - amount 
         WHERE (set_key & iset) = iset;
      -- update structured data with rule #2
-       TRUNCATE sdtmp;
-       INSERT INTO sdtmp SELECT set_key, availability FROM structured_data_inc;
        DELETE FROM structured_data_inc WHERE set_key = ANY (
+       SELECT set_key FROM (
           SELECT sd1.set_key
-          FROM sdtmp sd1 JOIN sdtmp sd2
+          FROM structured_data_inc sd1 JOIN structured_data_inc sd2
           ON sd2.set_key > sd1.set_key 
           AND sd2.set_key & sd1.set_key = sd1.set_key 
-          AND sd1.availability >= sd2.availability);
+          AND sd1.availability >= sd2.availability) AS stmp
+       );
      -- propagate the changes into base table
      UPDATE structured_data_base sb, structured_data_inc sd
      SET sb.availability = LEAST(sb.availability, sd.availability)

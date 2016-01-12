@@ -14,7 +14,6 @@ call GetItemsFromSD(8,200000);
 call GetItemsFromSD(2,50000);
 call GetItemsFromSD(1,200000);
 call GetItemsFromSD(16,50000);
-call GetItemsFromSD(64,230000);
 call GetItemsFromSD(2,60000);
 call GetItemsFromSD(1,150000);
 call GetItemsFromSD(16,50000);
