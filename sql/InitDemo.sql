@@ -168,22 +168,14 @@ BEGIN
         SET availability = availability - amount 
         WHERE (set_key & iset) = iset;
      -- update structured data with rule #2
-     label1: LOOP
        TRUNCATE sdtmp;
-       INSERT /*IGNORE*/ INTO  sdtmp
-          SELECT set_key, availability FROM structured_data_inc WHERE set_key & iset = iset;
-       SELECT @row_cnt:=ROW_COUNT();
-       IF @row_cnt > 0 THEN
+       INSERT INTO sdtmp SELECT set_key, availability FROM structured_data_inc;
        DELETE FROM structured_data_inc WHERE set_key = ANY (
           SELECT sd1.set_key
           FROM sdtmp sd1 JOIN sdtmp sd2
           ON sd2.set_key > sd1.set_key 
           AND sd2.set_key & sd1.set_key = sd1.set_key 
           AND sd1.availability >= sd2.availability);
-          ITERATE label1;
-       END IF;
-       LEAVE label1;
-     END LOOP label1;  
      -- propagate the changes into base table
      UPDATE structured_data_base sb, structured_data_inc sd
      SET sb.availability = LEAST(sb.availability, sd.availability)
