@@ -26,6 +26,23 @@
       "goal": 150000
     },
     {
+      "name": "soccermoms",
+      "criteria": {
+        "income": [
+          "affluent",
+          "middle"
+        ],
+        "gender": [
+          "F"
+        ],
+        "content": [
+          "food",
+          "fashion"
+        ]
+      },
+      "goal": 450000
+    },
+    {
       "name": "boyscouts",
       "criteria": {
         "content": [
@@ -44,7 +61,22 @@
       "goal": 450000
     },
     {
-      "name": "Eeasterners",
+      "name": "millennials",
+      "criteria": {
+        "content": [
+          "sport",
+          "games",
+          "fashion",
+          "outdoor"
+        ],
+        "age": [
+          "young"
+        ]
+      },
+      "goal": 650000
+    },
+    {
+      "name": "eeasterners",
       "criteria": {
         "state": [
           "MA",
@@ -58,16 +90,24 @@
       "goal": 150000
     },
     {
+      "name": "westerners",
+      "criteria": {
+        "state": [
+          "OR",
+          "WA",
+          "CA",
+          "NM",
+          "UT"
+        ]
+      },
+      "goal": 250000
+    },
+    {
       "name": "young women",
       "criteria": {
         "content": [
           "fashion",
-          "food",
-          "news"
-        ],
-        "income": [
-          "affluent",
-          "middle"
+          "food"
         ],
         "gender": [
           "F"
@@ -115,8 +155,25 @@
           "sport"
         ],
         "age": [
-          "young",
-          "child"
+          "child",
+          "young"
+        ]
+      },
+      "goal": 150000
+    },
+    {
+      "name": "girls",
+      "criteria": {
+        "gender": [
+          "F"
+        ],
+        "content": [
+          "fashion",
+          "food"
+        ],
+        "age": [
+          "child",
+          "young"
         ]
       },
       "goal": 150000
@@ -404,6 +461,35 @@
     },
     {
       "criteria": {
+        "content": [
+          "sport",
+          "outdoor"
+        ],
+        "gender": [
+          "M"
+        ],
+        "age": [
+          "young"
+        ]
+      },
+      "count": 40000
+    },
+    {
+      "criteria": {
+        "content": [
+          "outdoor"
+        ],
+        "gender": [
+          "M"
+        ],
+        "age": [
+          "child"
+        ]
+      },
+      "count": 40000
+    },
+    {
+      "criteria": {
         "state": [
           "ND"
         ],
@@ -446,6 +532,41 @@
           "M"
         ],
         "content": [
+          "sport",
+          "games"
+        ],
+        "state": [
+          "NJ"
+        ],
+        "age": [
+          "young"
+        ]
+      },
+      "count": 80000
+    },
+    {
+      "criteria": {
+        "gender": [
+          "M"
+        ],
+        "content": [
+          "games"
+        ],
+        "state": [
+          "NY"
+        ],
+        "age": [
+          "young"
+        ]
+      },
+      "count": 80000
+    },
+    {
+      "criteria": {
+        "gender": [
+          "M"
+        ],
+        "content": [
           "news",
           "business"
         ],
@@ -465,6 +586,27 @@
         ],
         "income": [
           "affluent"
+        ],
+        "gender": [
+          "M"
+        ],
+        "content": [
+          "news",
+          "business"
+        ],
+        "age": [
+          "middle"
+        ]
+      },
+      "count": 180000
+    },
+    {
+      "criteria": {
+        "state": [
+          "CA"
+        ],
+        "income": [
+          "middle"
         ],
         "gender": [
           "M"
