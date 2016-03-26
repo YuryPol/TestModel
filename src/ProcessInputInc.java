@@ -34,10 +34,14 @@ public class ProcessInputInc {
                 new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(new Date()));
 		byte[] jsonData = null;
 		try {
-			jsonData = Files.readAllBytes(Paths.get("C:/Users/Yury/Documents/GitHub/TestModel/Input/document.json"));
+			jsonData = Files.readAllBytes(Paths.get(args[0]
+					// "C:/Users/Yury/Documents/GitHub/TestModel/Input/document.json"
+					));
 		} catch (NoSuchFileException e0) {
 			try {
-				jsonData = Files.readAllBytes(Paths.get("C:/Users/ypolyako/workspace/TestModel/Input/document.json"));
+				jsonData = Files.readAllBytes(Paths.get(args[0]
+						// "C:/Users/ypolyako/workspace/TestModel/Input/document.json"
+						));
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
