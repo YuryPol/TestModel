@@ -1,20 +1,21 @@
-select set_key_is, lpad(bin(set_key), 10, '0') as set_key, set_name, capacity, availability, goal, criteria from structured_data_base;
-select lpad(bin(set_key), 10, '0') as set_key, set_name, capacity, availability, goal from structured_data_inc -- order by capacity
-;
+
+select set_key_is, lpad(bin(set_key), 20, '0') as set_key, set_name, capacity from structured_data_base;
+select lpad(bin(set_key), 20, '0') as set_key, set_name, capacity, availability, goal from structured_data_inc; -- order by capacity
+
 
 select set_key_is, set_name, capacity, availability, goal from structured_data_base;
 call GetItemsFromSD(
 1,10);
 
-select lpad(bin(set_key), 10, '0') as set_key, set_name, capacity, availability, goal from unions_next_rank; -- order by capacity
+select lpad(bin(set_key), 20, '0') as set_key, set_name, capacity, availability, goal from unions_next_rank; -- order by capacity
 
-select lpad(bin(basesets), 10, '0') as set_key, count from raw_inventory;
+select lpad(bin(basesets), 20, '0') as set_key, count from raw_inventory;
 
-select lpad(bin(basesets), 10, '0') as basesets, count, criteria from raw_inventory_ex;   
+select lpad(bin(basesets), 20, '0') as basesets, count, criteria from raw_inventory_ex;   
 
-select lpad(bin(set_key_is), 10, '0') as set_key_is, lpad(bin(set_key), 10, '0') as baseset from result_serving;
+select lpad(bin(set_key_is), 20, '0') as set_key_is, lpad(bin(set_key), 20, '0') as baseset from result_serving;
 
-select set_key_is, lpad(bin(set_key), 10, '0') as set_key, capacity, availability, goal, served_count from result_serving;
+select set_key_is, lpad(bin(set_key), 20, '0') as set_key, capacity, availability, goal, served_count from result_serving;
 
 --
 -- testing aids
