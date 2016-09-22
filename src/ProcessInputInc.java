@@ -74,6 +74,17 @@ public class ProcessInputInc {
 			int highBit = 0;
 			for (inventoryset is : inventorydata.getInventorysets())
 			{
+				boolean match_found = false;
+				for (BaseSet bs1 : base_sets.values())
+				{
+					if (bs1.getCriteria().matches(is.getcriteria()))
+					{
+						match_found = true;
+						break;
+					}
+				}
+				if (match_found)
+					continue;
 				BaseSet tmp = new BaseSet(BITMAP_SIZE);
 				tmp.setkey(highBit);
 				tmp.setname(is.getName());
@@ -114,7 +125,13 @@ public class ProcessInputInc {
 				}
 				if (match_found) 
 				{
-					tmp.setcapacity(seg.getCount());
+					int capacity = seg.getCount();
+					BaseSegement existing = null;
+					if ((existing = base_segments.get(tmp.getkey())) != null)
+					{
+						capacity += existing.getcapacity();
+					}
+					tmp.setcapacity(capacity);
 					base_segments.put(tmp.getkey(), tmp);
 				}
 				if (DEBUG & tmp.getcapacity() == 0)
