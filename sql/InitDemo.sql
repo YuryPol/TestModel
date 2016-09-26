@@ -11,12 +11,14 @@ USE Demo;
 -- setting up the tables
 --
 
--- create raw_inventory_ex table to fill up by impressons' counts
-DROP TABLE IF EXISTS raw_inventory_ex;
-CREATE TABLE raw_inventory_ex(
+-- create raw_inventory table to fill up by impressons' counts
+DROP TABLE IF EXISTS raw_inventory;
+CREATE TABLE raw_inventory(
     basesets BIGINT NOT NULL, 
     count INT NOT NULL,
-    criteria VARCHAR(200) DEFAULT NULL)
+    criteria VARCHAR(200) DEFAULT NULL,
+    weight BIGINT DEFAULT 0,
+    PRIMARY KEY(basesets))
 ;
 
 -- create structured data table

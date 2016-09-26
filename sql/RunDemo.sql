@@ -27,13 +27,6 @@ CREATE /*TEMPORARY*/ TABLE unions_next_rank(
     PRIMARY KEY(set_key)) /*ENGINE=MEMORY*/
 ;
 
-DROP TABLE IF EXISTS raw_inventory;
-CREATE TABLE raw_inventory AS 
-SELECT basesets, sum(count) as count
-   FROM raw_inventory_ex
-   GROUP BY basesets; -- adds up multiple records in raw_inventory_ex with the same key
-   -- That shouldn't be necessary as raw_inventory_ex already groups them but verification is needed.
-   
 -- update raw inventory with weights
 ALTER TABLE raw_inventory ADD weight BIGINT DEFAULT '0' NOT NULL;
 SELECT @n:=0;
